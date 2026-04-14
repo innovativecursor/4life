@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -120,6 +121,7 @@ func GoogleCallbackHandler(c *gin.Context, db *gorm.DB) {
 
 	token, err := oauthCfg.Exchange(context.Background(), code)
 	if err != nil {
+		fmt.Println("ACTUAL ERROR:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to exchange code"})
 		return
 	}
@@ -134,11 +136,11 @@ func GoogleCallbackHandler(c *gin.Context, db *gorm.DB) {
 	firstName, _ := userInfo["given_name"].(string)
 	lastName, _ := userInfo["family_name"].(string)
 
-	var admin models.Admin
+	var admin models.User
 	err = db.Where("email = ?", email).First(&admin).Error
 	if err == gorm.ErrRecordNotFound {
 		// Create new admin with pending approval
-		jwtToken, err := userinfobygoogle.AddAdminInfo(c, db, email, firstName, lastName)
+		_, err := userinfobygoogle.AddAdminInfo(c, db, email, firstName, lastName)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -147,7 +149,6 @@ func GoogleCallbackHandler(c *gin.Context, db *gorm.DB) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Account created. Awaiting approval from Superadmin.",
 			"status":  "pending",
-			"token":   jwtToken,
 		})
 		return
 	} else if err != nil {
@@ -193,7 +194,7 @@ func GetAllAdmins(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	adminUser, ok := user.(*models.Admin)
+	adminUser, ok := user.(*models.User)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user object"})
 		return
@@ -205,7 +206,7 @@ func GetAllAdmins(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	var admins []models.Admin
+	var admins []models.User
 
 	if err := db.Order("created_at DESC").Find(&admins).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch admins"})
@@ -257,7 +258,7 @@ func SuperAdminUpdateAdmin(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	currentAdmin, ok := user.(*models.Admin)
+	currentAdmin, ok := user.(*models.User)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user object"})
 		return
@@ -273,19 +274,20 @@ func SuperAdminUpdateAdmin(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	validRoles := map[string]bool{
-		"Admin":    true,
-		"ReadOnly": true,
+	if req.Role != "" {
+		var role models.ApplicationRole
+		err := db.Where("name = ?", req.Role).First(&role).Error
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role"})
+			return
+		} else if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			return
+		}
 	}
-
 	validStatus := map[string]bool{
 		"approved": true,
 		"rejected": true,
-	}
-
-	if req.Role != "" && !validRoles[req.Role] {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role"})
-		return
 	}
 
 	if req.Status != "" && !validStatus[req.Status] {
@@ -298,7 +300,7 @@ func SuperAdminUpdateAdmin(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	var admin models.Admin
+	var admin models.User
 	if err := db.Where("email = ?", req.Email).First(&admin).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Admin not found"})
 		return
@@ -319,4 +321,48 @@ func SuperAdminUpdateAdmin(c *gin.Context, db *gorm.DB) {
 	db.Model(&admin).Updates(updateData)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Admin updated successfully", "admin": admin})
+}
+
+func GetAllApplicationRoles(c *gin.Context, db *gorm.DB) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	_, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user object"})
+		return
+	}
+
+	var roles []models.ApplicationRole
+
+	if err := db.Order("created_at DESC").Find(&roles).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to fetch roles",
+		})
+		return
+	}
+
+	type RoleResponse struct {
+		ID        uint   `json:"id"`
+		Name      string `json:"name"`
+		CreatedAt string `json:"created_at"`
+	}
+
+	var response []RoleResponse
+
+	for _, r := range roles {
+		response = append(response, RoleResponse{
+			ID:        r.ID,
+			Name:      r.Name,
+			CreatedAt: r.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"total": len(response),
+		"roles": response,
+	})
 }

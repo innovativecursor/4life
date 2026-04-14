@@ -13,10 +13,10 @@ import (
 
 func AddAdminInfo(c *gin.Context, db *gorm.DB, email, firstName, lastName string) (string, error) {
 	// Default new user role and approval
-	role := "admin"
+	role := "NA"
 	approvalStatus := "pending"
 
-	var existing models.Admin
+	var existing models.User
 	err := db.Where("email = ?", email).First(&existing).Error
 
 	if err == nil && existing.ApplicationRole == "Superadmin" {
@@ -25,7 +25,7 @@ func AddAdminInfo(c *gin.Context, db *gorm.DB, email, firstName, lastName string
 	}
 
 	if err == gorm.ErrRecordNotFound {
-		admin := models.Admin{
+		admin := models.User{
 			Email:           email,
 			FirstName:       firstName,
 			LastName:        lastName,

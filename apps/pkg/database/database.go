@@ -35,7 +35,7 @@ func InitDB() (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(5 * time.Minute) // Maximum lifetime of a connection
 
 	// Create database tables
-	err = dbConn.AutoMigrate(&models.Admin{})
+	err = dbConn.AutoMigrate(&models.User{}, &models.ApplicationRole{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to auto migrate User table: %v", err)
 	}
@@ -44,16 +44,19 @@ func InitDB() (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to seed superadmin: %v", err)
 	}
 
+	if err := seedApplicationRoles(dbConn); err != nil {
+		return nil, fmt.Errorf("failed to seed roles: %v", err)
+	}
 	return dbConn, nil
 }
 
 func seedSuperAdmin(db *gorm.DB, cfg config.Config) error {
-	var existing models.Admin
+	var existing models.User
 
 	err := db.Where("email = ?", cfg.SuperAdmin.Email).First(&existing).Error
 
 	if err == gorm.ErrRecordNotFound {
-		superAdmin := models.Admin{
+		superAdmin := models.User{
 			Email:           cfg.SuperAdmin.Email,
 			FirstName:       cfg.SuperAdmin.FirstName,
 			LastName:        cfg.SuperAdmin.LastName,
@@ -80,5 +83,37 @@ func seedSuperAdmin(db *gorm.DB, cfg config.Config) error {
 		db.Save(&existing)
 	}
 
+	return nil
+}
+
+func seedApplicationRoles(db *gorm.DB) error {
+	roles := []string{
+		"Superadmin",
+		"Manufacturer",
+		"Exporter",
+		"Importer",
+		"Distributor",
+		"Retailer",
+	}
+
+	for _, role := range roles {
+		var existing models.ApplicationRole
+
+		err := db.Where("name = ?", role).First(&existing).Error
+
+		if err == gorm.ErrRecordNotFound {
+			newRole := models.ApplicationRole{
+				Name: role,
+			}
+
+			if err := db.Create(&newRole).Error; err != nil {
+				return err
+			}
+		} else if err != nil {
+			return err
+		}
+	}
+
+	fmt.Println("Application roles seeded successfully")
 	return nil
 }
