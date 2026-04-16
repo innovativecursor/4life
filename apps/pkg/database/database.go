@@ -35,7 +35,7 @@ func InitDB() (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(5 * time.Minute) // Maximum lifetime of a connection
 
 	// Create database tables
-	err = dbConn.AutoMigrate(&models.User{}, &models.ApplicationRole{})
+	err = dbConn.AutoMigrate(&models.User{}, &models.ApplicationRole{}, &models.Timeline{}, &models.TimelineStep{}, &models.Project{}, &models.ProjectStepStatus{}, &models.ProjectStepImage{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to auto migrate User table: %v", err)
 	}
@@ -46,6 +46,10 @@ func InitDB() (*gorm.DB, error) {
 
 	if err := seedApplicationRoles(dbConn); err != nil {
 		return nil, fmt.Errorf("failed to seed roles: %v", err)
+	}
+
+	if err := SeedDefaultTimeline(dbConn); err != nil {
+		return nil, fmt.Errorf("failed to seed timelines: %v", err)
 	}
 	return dbConn, nil
 }
@@ -116,4 +120,47 @@ func seedApplicationRoles(db *gorm.DB) error {
 
 	fmt.Println("Application roles seeded successfully")
 	return nil
+}
+
+func SeedDefaultTimeline(db *gorm.DB) error {
+	var count int64
+	if err := db.Model(&models.Timeline{}).
+		Where("is_default = ?", true).
+		Count(&count).Error; err != nil {
+		return err
+	}
+
+	if count > 0 {
+		return nil
+	}
+
+	return db.Transaction(func(tx *gorm.DB) error {
+		timeline := models.Timeline{
+			Name:      "Default Pharma Timeline",
+			IsDefault: true,
+		}
+
+		if err := tx.Create(&timeline).Error; err != nil {
+			return err
+		}
+
+		steps := []models.TimelineStep{
+			{Name: "Raw materials receipt", StepOrder: 1, TimelineID: timeline.ID},
+			{Name: "Production has commenced", StepOrder: 2, TimelineID: timeline.ID},
+			{Name: "Blister packing", StepOrder: 3, TimelineID: timeline.ID},
+			{Name: "Secondary packing", StepOrder: 4, TimelineID: timeline.ID},
+			{Name: "QA/QC", StepOrder: 5, TimelineID: timeline.ID},
+			{Name: "Batch dispatch", StepOrder: 6, TimelineID: timeline.ID},
+			{Name: "Imported", StepOrder: 7, TimelineID: timeline.ID},
+			{Name: "At the warehouse", StepOrder: 8, TimelineID: timeline.ID},
+			{Name: "Dispatched from the warehouse", StepOrder: 9, TimelineID: timeline.ID},
+		}
+
+		if err := tx.Create(&steps).Error; err != nil {
+			return err
+		}
+
+		fmt.Println("Default timeline seeded successfully")
+		return nil
+	})
 }

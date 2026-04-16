@@ -28,10 +28,16 @@ type Config struct {
 		LastName  string `yaml:"lastName"`
 	} `yaml:"superadmin"`
 	GoogleOauth struct {
-		ClientID              string `yaml:"clientId"`
-		ClientSecret          string `yaml:"clientSecret"`
-		AdminRedirectURI      string `yaml:"adminRedirectUri"`
+		ClientID         string `yaml:"clientId"`
+		ClientSecret     string `yaml:"clientSecret"`
+		AdminRedirectURI string `yaml:"adminRedirectUri"`
 	} `yaml:"googleOauth"`
+	S3 struct {
+		AccessKey  string `yaml:"accessKey"`
+		SecretKey  string `yaml:"secretKey"`
+		Region     string `yaml:"region"`
+		BucketName string `yaml:"bucketName"`
+	} `yaml:"s3"`
 }
 
 func Env() (Config, error) {
