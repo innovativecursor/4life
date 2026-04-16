@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/innovativecursor/4life/apps/pkg/middleware"
 	"github.com/innovativecursor/4life/apps/pkg/oauth"
+	"github.com/innovativecursor/4life/apps/pkg/projectandtimeline"
 	"github.com/innovativecursor/4life/apps/routes/getapiroutes"
 	"gorm.io/gorm"
 )
@@ -45,6 +46,30 @@ func Admin(db *gorm.DB) {
 		oauth.SuperAdminUpdateAdmin(c, db)
 	})
 
+	//project and timeline
+	apiV1.POST("/project/add-timeline", middleware.JWTMiddleware(db), func(c *gin.Context) {
+		projectandtimeline.CreateTimeline(c, db)
+	})
+
+	apiV1.GET("/project/get-all-timelines", middleware.JWTMiddleware(db), func(c *gin.Context) {
+		projectandtimeline.GetAllTimelines(c, db)
+	})
+
+	apiV1.POST("/project/create-project", middleware.JWTMiddleware(db), func(c *gin.Context) {
+		projectandtimeline.CreateProject(c, db)
+	})
+
+	apiV1.GET("/projects/get-all-project", middleware.JWTMiddleware(db), func(c *gin.Context) {
+		projectandtimeline.GetAllProjects(c, db)
+	})
+
+	apiV1.GET("/project/get-project-by/:id", middleware.JWTMiddleware(db), func(c *gin.Context) {
+		projectandtimeline.GetProjectByID(c, db)
+	})
+
+	apiV1.PUT("/project/step-status-update", middleware.JWTMiddleware(db), func(c *gin.Context) {
+		projectandtimeline.UpdateStepStatus(c, db)
+	})
 	// Listen and serve on defined port
 	log.Printf("Application started, Listening on Port %s", port)
 	router.Run(":" + port)
