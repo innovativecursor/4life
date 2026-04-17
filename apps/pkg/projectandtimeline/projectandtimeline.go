@@ -152,6 +152,113 @@ func GetAllTimelines(c *gin.Context, db *gorm.DB) {
 		"timelines": response,
 	})
 }
+
+func UpdateTimeline(c *gin.Context, db *gorm.DB) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	_, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user"})
+		return
+	}
+
+	var req struct {
+		TimelineID uint   `json:"timeline_id" binding:"required"`
+		Name       string `json:"name" binding:"required"`
+		Steps      []struct {
+			ID        *uint  `json:"id"` // optional
+			Name      string `json:"name" binding:"required"`
+			StepOrder int    `json:"step_order" binding:"required"`
+		} `json:"steps" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var timeline models.Timeline
+	if err := db.First(&timeline, req.TimelineID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Timeline not found"})
+		return
+	}
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+
+		if err := tx.Model(&timeline).
+			Update("name", req.Name).Error; err != nil {
+			return err
+		}
+
+		var existingSteps []models.TimelineStep
+		if err := tx.Where("timeline_id = ?", timeline.ID).
+			Find(&existingSteps).Error; err != nil {
+			return err
+		}
+
+		existingMap := make(map[uint]models.TimelineStep)
+		for _, s := range existingSteps {
+			existingMap[s.ID] = s
+		}
+
+		// track processed IDs
+		usedIDs := make(map[uint]bool)
+
+		for _, step := range req.Steps {
+
+			// UPDATE
+			if step.ID != nil {
+				if existing, ok := existingMap[*step.ID]; ok {
+
+					existing.Name = step.Name
+					existing.StepOrder = step.StepOrder
+
+					if err := tx.Save(&existing).Error; err != nil {
+						return err
+					}
+
+					usedIDs[*step.ID] = true
+				}
+			} else {
+				// CREATE
+				newStep := models.TimelineStep{
+					Name:       step.Name,
+					StepOrder:  step.StepOrder,
+					TimelineID: timeline.ID,
+				}
+
+				if err := tx.Create(&newStep).Error; err != nil {
+					return err
+				}
+			}
+		}
+
+		for _, s := range existingSteps {
+			if !usedIDs[s.ID] {
+				if err := tx.Delete(&s).Error; err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to update timeline",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Timeline updated successfully",
+	})
+}
 func CreateProject(c *gin.Context, db *gorm.DB) {
 	user, exists := c.Get("user")
 	if !exists {
@@ -188,23 +295,13 @@ func CreateProject(c *gin.Context, db *gorm.DB) {
 	project := models.Project{
 		Name:        req.Name,
 		Description: req.Description,
+		Market:      req.Market,
 		TimelineID:  timelineID,
 	}
 
 	if err := db.Create(&project).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create project"})
 		return
-	}
-
-	var steps []models.TimelineStep
-	db.Where("timeline_id = ?", timelineID).Find(&steps)
-
-	for _, step := range steps {
-		db.Create(&models.ProjectStepStatus{
-			ProjectID:      project.ID,
-			TimelineStepID: step.ID,
-			Status:         "pending",
-		})
 	}
 
 	c.JSON(http.StatusOK, project)
@@ -288,7 +385,6 @@ func GetProjectByID(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	// ✅ fetch step statuses + join timeline_steps
 	type StepResponse struct {
 		StepID    uint     `json:"step_id"`
 		Name      string   `json:"name"`
@@ -315,33 +411,39 @@ func GetProjectByID(c *gin.Context, db *gorm.DB) {
 		Order("step_order ASC").
 		Find(&timelineSteps)
 
-	// map timelineStepID → step details
-	stepMap := make(map[uint]models.TimelineStep)
-	for _, ts := range timelineSteps {
-		stepMap[ts.ID] = ts
+		// map timelineStepID → step details
+		// create status map
+	statusMap := make(map[uint]models.ProjectStepStatus)
+	for _, s := range stepStatuses {
+		statusMap[s.TimelineStepID] = s
 	}
 
 	var responseSteps []StepResponse
 
-	for _, s := range stepStatuses {
+	for _, step := range timelineSteps {
 
-		step := stepMap[s.TimelineStepID]
-
+		status := "pending"
+		updatedBy := uint(0)
 		var imageURLs []string
-		for _, img := range s.Images {
-			imageURLs = append(imageURLs, img.ImageURL)
+
+		if s, ok := statusMap[step.ID]; ok {
+			status = s.Status
+			updatedBy = s.UpdatedByID
+
+			for _, img := range s.Images {
+				imageURLs = append(imageURLs, img.ImageURL)
+			}
 		}
 
 		responseSteps = append(responseSteps, StepResponse{
 			StepID:    step.ID,
 			Name:      step.Name,
 			StepOrder: step.StepOrder,
-			Status:    s.Status,
-			UpdatedBy: s.UpdatedByID,
+			Status:    status,
+			UpdatedBy: updatedBy,
 			Images:    imageURLs,
 		})
 	}
-
 	// sort by step_order (important)
 	sort.Slice(responseSteps, func(i, j int) bool {
 		return responseSteps[i].StepOrder < responseSteps[j].StepOrder
@@ -387,15 +489,51 @@ func UpdateStepStatus(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	var stepStatus models.ProjectStepStatus
-	if err := db.Where("project_id = ? AND timeline_step_id = ?",
-		req.ProjectID, req.TimelineStepID).
-		First(&stepStatus).Error; err != nil {
+	// 🔥 CHECK ROLE PERMISSION
+	var allowedRoles []models.TimelineStepRole
 
-		c.JSON(http.StatusNotFound, gin.H{"error": "Step not found"})
+	if err := db.Where("timeline_step_id = ?", req.TimelineStepID).
+		Find(&allowedRoles).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Role check failed"})
 		return
 	}
 
+	hasAccess := false
+	// allow admin/superadmin always
+	if currentUser.ApplicationRole == "Superadmin" || currentUser.ApplicationRole == "Admin" {
+		hasAccess = true
+	} else {
+		for _, r := range allowedRoles {
+			if r.RoleName == currentUser.ApplicationRole {
+				hasAccess = true
+				break
+			}
+		}
+	}
+	if !hasAccess {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "You are not allowed to update this step",
+		})
+		return
+	}
+	var stepStatus models.ProjectStepStatus
+
+	err := db.Where("project_id = ? AND timeline_step_id = ?",
+		req.ProjectID, req.TimelineStepID).
+		First(&stepStatus).Error
+
+	if err != nil {
+		stepStatus = models.ProjectStepStatus{
+			ProjectID:      req.ProjectID,
+			TimelineStepID: req.TimelineStepID,
+			Status:         "pending",
+		}
+
+		if err := db.Create(&stepStatus).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create step"})
+			return
+		}
+	}
 	cfgData, err := cfg.Env()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Configuration error"})
@@ -468,4 +606,43 @@ func UpdateStepStatus(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Step updated successfully",
 	})
+}
+
+func AssignRolesToStep(c *gin.Context, db *gorm.DB) {
+
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	_, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user object"})
+		return
+	}
+
+	var req struct {
+		TimelineStepID uint     `json:"timeline_step_id"`
+		Roles          []string `json:"roles"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// delete old roles
+	db.Where("timeline_step_id = ?", req.TimelineStepID).
+		Delete(&models.TimelineStepRole{})
+
+	// add new roles
+	for _, role := range req.Roles {
+		db.Create(&models.TimelineStepRole{
+			TimelineStepID: req.TimelineStepID,
+			RoleName:       role,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Roles assigned successfully"})
 }

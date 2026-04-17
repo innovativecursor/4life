@@ -8,6 +8,7 @@ type CreateTimelineRequest struct {
 type CreateProjectRequest struct {
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
+	Market      string `json:"market"`
 	TimelineID  *uint  `json:"timeline_id"`
 }
 
