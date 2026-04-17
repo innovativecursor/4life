@@ -21,10 +21,18 @@ func Admin(db *gorm.DB) {
 	}
 
 	apiV1, router := getapiroutes.GetApiRoutes()
-	// superadminOnly := []string{"Superadmin"}
-	// adminAndSuperadmin := []string{"Superadmin", "Admin"}
-	// allRoles := []string{"Superadmin", "Admin", "ReadOnly"}
-
+	superadminOnly := []string{"Superadmin"}
+	adminAndSuperadmin := []string{"Superadmin", "Admin"}
+	var allRoles = []string{
+		"Superadmin",
+		"Admin",
+		"ReadOnly",
+		"Manufacturer",
+		"Exporter",
+		"Importer",
+		"Distributor",
+		"Retailer",
+	}
 	// Define handlers oauth
 	apiV1.GET("/admin", func(c *gin.Context) {
 		c.String(http.StatusOK, "admin Service Healthy")
@@ -34,41 +42,48 @@ func Admin(db *gorm.DB) {
 		oauth.GoogleCallbackHandler(c, db)
 	})
 
-	apiV1.GET("/superadmin/get-all-admin", middleware.JWTMiddleware(db), func(c *gin.Context) {
+	apiV1.GET("/superadmin/get-all-admin", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, superadminOnly...), func(c *gin.Context) {
 		oauth.GetAllAdmins(c, db)
 	})
 
-	apiV1.GET("/superadmin/get-all-roles", middleware.JWTMiddleware(db), func(c *gin.Context) {
+	apiV1.GET("/superadmin/get-all-roles", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, superadminOnly...), func(c *gin.Context) {
 		oauth.GetAllApplicationRoles(c, db)
 	})
 
-	apiV1.PUT("/superadmin/approve-uesrs", middleware.JWTMiddleware(db), func(c *gin.Context) {
+	apiV1.PUT("/superadmin/approve-uesrs", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, superadminOnly...), func(c *gin.Context) {
 		oauth.SuperAdminUpdateAdmin(c, db)
 	})
 
 	//project and timeline
-	apiV1.POST("/project/add-timeline", middleware.JWTMiddleware(db), func(c *gin.Context) {
+	apiV1.POST("/project/add-timeline", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, superadminOnly...), func(c *gin.Context) {
 		projectandtimeline.CreateTimeline(c, db)
 	})
 
-	apiV1.GET("/project/get-all-timelines", middleware.JWTMiddleware(db), func(c *gin.Context) {
+	apiV1.GET("/project/get-all-timelines", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, superadminOnly...), func(c *gin.Context) {
 		projectandtimeline.GetAllTimelines(c, db)
 	})
 
-	apiV1.POST("/project/create-project", middleware.JWTMiddleware(db), func(c *gin.Context) {
+	apiV1.PUT("/project/update-timelines", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, superadminOnly...), func(c *gin.Context) {
+		projectandtimeline.UpdateTimeline(c, db)
+	})
+	apiV1.POST("/project/create-project", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, superadminOnly...), func(c *gin.Context) {
 		projectandtimeline.CreateProject(c, db)
 	})
 
-	apiV1.GET("/projects/get-all-project", middleware.JWTMiddleware(db), func(c *gin.Context) {
+	apiV1.GET("/projects/get-all-project", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, allRoles...), func(c *gin.Context) {
 		projectandtimeline.GetAllProjects(c, db)
 	})
 
-	apiV1.GET("/project/get-project-by/:id", middleware.JWTMiddleware(db), func(c *gin.Context) {
+	apiV1.GET("/project/get-project-by/:id", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, allRoles...), func(c *gin.Context) {
 		projectandtimeline.GetProjectByID(c, db)
 	})
 
-	apiV1.PUT("/project/step-status-update", middleware.JWTMiddleware(db), func(c *gin.Context) {
+	apiV1.PUT("/project/step-status-update", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, allRoles...), func(c *gin.Context) {
 		projectandtimeline.UpdateStepStatus(c, db)
+	})
+
+	apiV1.POST("/project/assign-step-roles", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, adminAndSuperadmin...), func(c *gin.Context) {
+		projectandtimeline.AssignRolesToStep(c, db)
 	})
 	// Listen and serve on defined port
 	log.Printf("Application started, Listening on Port %s", port)

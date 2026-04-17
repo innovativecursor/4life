@@ -36,6 +36,7 @@ type TimelineStep struct {
 type Project struct {
 	gorm.Model
 	Name        string
+	Market      string
 	Description string
 	TimelineID  uint
 	Timeline    Timeline `gorm:"foreignKey:TimelineID"`
@@ -59,4 +60,11 @@ type ProjectStepImage struct {
 
 	ProjectStepStatusID uint
 	ImageURL            string
+}
+
+type TimelineStepRole struct {
+	gorm.Model
+
+	TimelineStepID uint
+	RoleName       string // "Manufacturer", "Exporter", etc.
 }

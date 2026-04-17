@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/innovativecursor/4life/apps/pkg/config"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/innovativecursor/4life/apps/pkg/config"
 	"github.com/innovativecursor/4life/apps/pkg/models"
 	"gorm.io/gorm"
 )
@@ -74,6 +74,62 @@ func JWTMiddleware(db *gorm.DB) gin.HandlerFunc {
 		c.Set("user", &user)
 
 		// Continue to next handler
+		c.Next()
+	}
+}
+
+// RoleMiddleware checks if the user has one of the allowed roles and is approved.
+func RoleMiddleware(db *gorm.DB, allowedRoles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Get user email from context (set from JWT or session)
+		userObj, exists := c.Get("user")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+
+		admin, ok := userObj.(*models.User)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user object"})
+			c.Abort()
+			return
+		}
+
+		// Check approval status
+		switch admin.ApprovalStatus {
+		case "pending":
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access pending approval"})
+			c.Abort()
+			return
+		case "rejected":
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied — admin rejected"})
+			c.Abort()
+			return
+		case "approved":
+			// continue
+		default:
+			c.JSON(http.StatusForbidden, gin.H{"error": "Invalid admin status"})
+			c.Abort()
+			return
+		}
+
+		// Check if the admin's role is allowed
+		allowed := false
+		for _, role := range allowedRoles {
+			if admin.ApplicationRole == role {
+				allowed = true
+				break
+			}
+		}
+
+		if !allowed {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied for this role"})
+			c.Abort()
+			return
+		}
+
+		// User is approved and role is allowed
 		c.Next()
 	}
 }
