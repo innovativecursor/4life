@@ -1,23 +1,39 @@
-import { Route, Routes } from "react-router-dom";
-import LayOut from "../layout/Layout";
-import NotFound from "../../pages/NotFound";
-// import ProtectedRoute from "./ProtectedRoute";
+import { Routes, Route } from "react-router-dom";
+
 import Login from "../../pages/auth/Login";
+import NotFound from "../../pages/NotFound";
+import LayOut from "../layout/Layout";
+import ProtectedRoute from "./ProtectedRoute";
+import PublicRoute from "./PublicRoute";
+import Dashboard from "../../pages/dashboad/Dashboard";
 
 const AllRoutes = () => {
   return (
     <Routes>
-      <Route path="*" element={<NotFound />} />
-      <Route element={<ProtectedRoute type="public" />}>
-        <Route path="/" element={<Login />} />
+      {/* Public */}
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+
+      {/* Private Layout */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <LayOut />
+          </ProtectedRoute>
+        }
+      >
+        {/* Nested routes */}
+        <Route path="/dashboard" element={<Dashboard />} />
       </Route>
 
-      {/* Dashboard Layout */}
-      {/* <Route element={<ProtectedRoute type="private" />}>
-        <Route element={<LayOut />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Route>
-      </Route> */}
+      {/* Not Found */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

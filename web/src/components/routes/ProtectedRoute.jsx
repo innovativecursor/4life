@@ -1,42 +1,16 @@
-// import { Navigate, Outlet } from "react-router-dom";
-// import { Spin } from "antd";
-// import { useAuthContext } from "../../contexts/AuthContext";
+import { Navigate } from "react-router-dom";
+import { useAuthContext } from "../../contexts/AuthContext";
 
-// const ProtectedRoute = ({ type }) => {
-//   const { token, authInitializing } = useAuthContext();
-//   const rememberToken = localStorage.getItem("rememberToken");
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuthContext();
 
-//   if (authInitializing) {
-//     return (
-//       <div className="fixed inset-0 bg-gray-200 bg-opacity-40 flex items-center justify-center z-50">
-//         <Spin />
-//       </div>
-//     );
-//   }
+  if (loading) return <div>Loading...</div>;
 
-//   if (type === "public" && token && rememberToken) {
-//     return <Navigate to="/dashboard" replace />;
-//   }
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
-//   if (type === "private" && !token) {
-//     return <Navigate to="/" replace />;
-//   }
+  return children;
+};
 
-//   return <Outlet />;
-// };
-
-// export default ProtectedRoute;
-
-
-
-import React from 'react'
-
-const ProtectedRoute = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
-
-export default ProtectedRoute
+export default ProtectedRoute;
