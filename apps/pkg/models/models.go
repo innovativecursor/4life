@@ -68,3 +68,28 @@ type TimelineStepRole struct {
 	TimelineStepID uint
 	RoleName       string // "Manufacturer", "Exporter", etc.
 }
+
+type ProjectComplaint struct {
+	gorm.Model
+
+	ProjectID uint
+	UserID    uint
+
+	Text string
+
+	Images []ProjectComplaintImage `gorm:"foreignKey:ComplaintID"`
+}
+
+type ProjectComplaintImage struct {
+	gorm.Model
+
+	ComplaintID uint
+	ImageURL    string
+}
+
+type ComplaintRoleAccess struct {
+	gorm.Model
+
+	ProjectID uint
+	RoleName  string // Manufacturer, Exporter, etc.
+}
