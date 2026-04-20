@@ -646,3 +646,150 @@ func AssignRolesToStep(c *gin.Context, db *gorm.DB) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Roles assigned successfully"})
 }
+
+func AssignComplaintRoles(c *gin.Context, db *gorm.DB) {
+
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	_, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user object"})
+		return
+	}
+
+	var req struct {
+		ProjectID uint     `json:"project_id"`
+		Roles     []string `json:"roles"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// delete old roles
+	db.Where("project_id = ?", req.ProjectID).
+		Delete(&models.ComplaintRoleAccess{})
+
+	// insert new roles
+	for _, role := range req.Roles {
+		db.Create(&models.ComplaintRoleAccess{
+			ProjectID: req.ProjectID,
+			RoleName:  role,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Complaint roles assigned",
+	})
+}
+
+func CreateComplaint(c *gin.Context, db *gorm.DB) {
+
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	currentUser, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user object"})
+		return
+	}
+
+	var req struct {
+		ProjectID uint     `json:"project_id" binding:"required"`
+		Text      string   `json:"text"`
+		Images    []string `json:"images"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if len(req.Images) > 5 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Maximum 5 images allowed",
+		})
+		return
+	}
+
+	var allowed []models.ComplaintRoleAccess
+	db.Where("project_id = ?", req.ProjectID).Find(&allowed)
+
+	hasAccess := false
+	for _, r := range allowed {
+		if r.RoleName == currentUser.ApplicationRole {
+			hasAccess = true
+			break
+		}
+	}
+
+	// superadmin override
+	if currentUser.ApplicationRole == "Superadmin" {
+		hasAccess = true
+	}
+
+	if !hasAccess {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "You are not allowed to complain on this project",
+		})
+		return
+	}
+
+	// create complaint
+	complaint := models.ProjectComplaint{
+		ProjectID: req.ProjectID,
+		UserID:    currentUser.ID,
+		Text:      req.Text,
+	}
+
+	if err := db.Create(&complaint).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create complaint"})
+		return
+	}
+
+	cfgData, _ := cfg.Env()
+	ctx := c.Request.Context()
+
+	// upload images
+	for _, base64Img := range req.Images {
+
+		decodedImage, err := base64.StdEncoding.DecodeString(base64Img)
+		if err != nil {
+			continue
+		}
+
+		uuid := s3helper.GenerateUniqueID().String()
+
+		s3helper.UploadToS3(
+			ctx,
+			"project",
+			"complaint",
+			cfgData.S3.BucketName,
+			uuid,
+			fmt.Sprintf("%d", currentUser.ID),
+			"complaint",
+			decodedImage,
+		)
+
+		ext, _ := s3helper.GetFileExtension(decodedImage)
+
+		imageURL := "https://" + cfgData.S3.BucketName + ".s3." + cfgData.S3.Region + ".amazonaws.com/" +
+			"project/complaint/" + uuid + "/" + fmt.Sprintf("%d", currentUser.ID) + "/complaint." + ext
+
+		db.Create(&models.ProjectComplaintImage{
+			ComplaintID: complaint.ID,
+			ImageURL:    imageURL,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Complaint created successfully",
+	})
+}
