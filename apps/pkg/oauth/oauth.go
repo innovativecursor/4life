@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/innovativecursor/4life/apps/pkg/config"
@@ -364,5 +365,70 @@ func GetAllApplicationRoles(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, gin.H{
 		"total": len(response),
 		"roles": response,
+	})
+}
+
+type CreateRoleRequest struct {
+	Name string `json:"name" binding:"required"`
+}
+
+func CreateApplicationRole(c *gin.Context, db *gorm.DB) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	currentUser, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user object"})
+		return
+	}
+
+	// Only Superadmin allowed
+	if currentUser.ApplicationRole != "Superadmin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only Superadmin can create roles"})
+		return
+	}
+
+	var req CreateRoleRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Normalize role name (important!)
+	roleName := strings.TrimSpace(req.Name)
+
+	if roleName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Role name cannot be empty"})
+		return
+	}
+
+	// Check if already exists
+	var existing models.ApplicationRole
+	err := db.Where("LOWER(name) = LOWER(?)", roleName).First(&existing).Error
+
+	if err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Role already exists"})
+		return
+	} else if err != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+
+	// Create new role
+	newRole := models.ApplicationRole{
+		Name: roleName,
+	}
+
+	if err := db.Create(&newRole).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create role"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Role created successfully",
+		"role":    newRole,
 	})
 }

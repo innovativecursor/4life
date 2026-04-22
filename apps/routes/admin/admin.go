@@ -50,6 +50,10 @@ func Admin(db *gorm.DB) {
 		oauth.GetAllApplicationRoles(c, db)
 	})
 
+	apiV1.POST("/superadmin/create-roles", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, superadminOnly...), func(c *gin.Context) {
+		oauth.CreateApplicationRole(c, db)
+	})
+
 	apiV1.PUT("/superadmin/approve-uesrs", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, superadminOnly...), func(c *gin.Context) {
 		oauth.SuperAdminUpdateAdmin(c, db)
 	})
@@ -84,6 +88,14 @@ func Admin(db *gorm.DB) {
 
 	apiV1.POST("/project/assign-step-roles", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, adminAndSuperadmin...), func(c *gin.Context) {
 		projectandtimeline.AssignRolesToStep(c, db)
+	})
+
+	apiV1.POST("/project/assign-complaint-roles", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, adminAndSuperadmin...), func(c *gin.Context) {
+		projectandtimeline.AssignComplaintRoles(c, db)
+	})
+
+	apiV1.POST("/project/create-complaint", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, allRoles...), func(c *gin.Context) {
+		projectandtimeline.CreateComplaint(c, db)
 	})
 	// Listen and serve on defined port
 	log.Printf("Application started, Listening on Port %s", port)
