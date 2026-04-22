@@ -6,6 +6,8 @@ import LayOut from "../layout/Layout";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 import Dashboard from "../../pages/dashboad/Dashboard";
+import Timeline from "../../pages/timeline/Timeline";
+import Project from "../../pages/project/Project";
 
 const AllRoutes = () => {
   return (
@@ -30,6 +32,10 @@ const AllRoutes = () => {
       >
         {/* Nested routes */}
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/timeline" element={<Timeline />} />
+        <Route path="/project" element={<Project />} />
+
+
       </Route>
 
       {/* Not Found */}

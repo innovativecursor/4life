@@ -1,15 +1,16 @@
 const Dashboard = () => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6  ">
 
       {/* Top Title */}
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-800">Overview</h1>
-        <p className="text-sm text-gray-500">Welcome back 👋</p>
+      <div className="md:mt-0 mt-6">
+        <h1 className="text-2xl md:text-start text-center font-semibold text-gray-800">Overview</h1>
+        <p className="text-sm md:text-start text-center text-gray-500">Welcome back </p>
       </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
         <StatCard title="Users" value="1,245" />
         <StatCard title="Revenue" value="$12,430" />
         <StatCard title="Orders" value="320" />
@@ -38,7 +39,7 @@ const Dashboard = () => {
 };
 
 const StatCard = ({ title, value }) => (
-  <div className="bg-white p-5 rounded-xl border border-[#F1E5C6]">
+  <div className="bg-white p-5 md:rounded-xl border border-[#F1E5C6]">
     <p className="text-sm text-gray-500">{title}</p>
     <h2 className="text-xl font-semibold text-gray-800 mt-1">{value}</h2>
   </div>

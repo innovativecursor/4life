@@ -13,6 +13,16 @@ const endpoints = {
   auth: {
     googleLogin: `${baseUrl}/v1/auth/google/callback`, // GET
   },
+
+  timeline: {
+    add: `${baseUrl}/v1/project/add-timeline`, // POST
+    list: `${baseUrl}/v1/project/get-all-timelines`, // GET
+  },
+  project: {
+    add: `${baseUrl}/v1/project/create-project`, // POST
+  }
+
+
 };
 
 export { baseUrl, apiPrefix };
