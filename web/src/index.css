@@ -1,0 +1,241 @@
+/* Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Nunito+Sans:wght@400&display=swap");
+
+@import "tailwindcss";
+
+/* ===============================
+   Root Theme Variables
+================================ */
+:root {
+  /* Colors */
+  --background: #ffffff;
+  --foreground: #1c1c1c;
+
+  --primary: #fff57e;
+  --secondary: #ff9b00;
+  --neutral-bg: #f6f6f0;
+
+  --dark-1: #1c1c1c;
+  --dark-2: #222222;
+  --dark-3: #666666;
+  --grey: #656665;
+  --black: #151313;
+  --navy: #212844;
+
+  /* Fonts */
+  --font-poppins:
+    "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Arial, sans-serif;
+
+  --font-nunito:
+    "Nunito Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+@theme {
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-dark-1: var(--dark-1);
+  --color-dark-2: var(--dark-2);
+  --color-dark-3: var(--dark-3);
+  --color-grey: var(--grey);
+  --color-black: var(--black);
+  --color-navy: var(--navy);
+}
+
+/* ===============================
+   Base Styles
+================================ */
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-poppins);
+    font-weight: 500;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-poppins);
+    font-weight: 600;
+    color: var(--dark-1);
+  }
+}
+
+/* ===============================
+   Font Utility Classes
+================================ */
+.font-poppins {
+  font-family: var(--font-poppins) !important;
+}
+
+.font-nunito {
+  font-family: var(--font-nunito) !important;
+}
+
+.font-poppins-400 {
+  font-family: var(--font-poppins);
+  font-weight: 400;
+}
+
+.font-poppins-500 {
+  font-family: var(--font-poppins);
+  font-weight: 500;
+}
+
+.font-poppins-600 {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+}
+
+.font-nunito-400 {
+  font-family: var(--font-nunito);
+  font-weight: 400;
+}
+
+/* ===============================
+   Color Utility Classes
+==================================== */
+.bg-primary {
+  background-color: var(--primary);
+}
+.text-primary {
+  color: var(--primary);
+}
+
+.bg-secondary {
+  background-color: var(--secondary);
+}
+
+.text-secondary {
+  color: var(--secondary);
+}
+
+.bg-neutral {
+  background-color: var(--neutral-bg);
+}
+
+.text-dark-1 {
+  color: var(--dark-1);
+}
+.text-dark-2 {
+  color: var(--dark-2);
+}
+.text-dark-3 {
+  color: var(--dark-3);
+}
+.text-grey {
+  color: var(--grey);
+}
+.text-black {
+  color: var(--black);
+}
+.text-navy {
+  color: var(--navy);
+}
+
+@layer utilities {
+  .border-secondary {
+    border-color: var(--secondary);
+  }
+}
+
+/* ===============================
+   Links
+================================ */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--secondary);
+}
+
+/* ===============================
+   Selection
+================================ */
+::selection {
+  background-color: var(--primary);
+  color: var(--dark-1);
+}
+
+/* ===============================
+   Scrollbar
+================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* ===============================
+   Responsive Utility Classes
+================================   */
+.responsive-mx {
+  @apply mx-3 sm:mx-4  md:mx-[3vw] lg:mx-[4vw];
+}
+
+.flex-between-center {
+  @apply flex justify-between items-center;
+}
+.flex-between-start {
+  @apply flex justify-between items-start;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ===============================
+   Smooth Scroll
+================================ */
+html {
+  scroll-behavior: smooth;
+}
+
+.input-style {
+  @apply border border-gray-300 rounded-xl px-3 py-3 text-sm outline-none focus:border-secondary w-full;
+}
