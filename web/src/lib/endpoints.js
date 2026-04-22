@@ -20,9 +20,15 @@ const endpoints = {
   },
   project: {
     add: `${baseUrl}/v1/project/create-project`, // POST
-  }
+  },
 
+  alladmin: {
+    list: `${baseUrl}/v1/superadmin/get-all-admin`, // GET
+  },
 
+  allrole: {
+    list: `${baseUrl}/v1/superadmin/get-all-roles`, // GET
+  },
 };
 
 export { baseUrl, apiPrefix };
