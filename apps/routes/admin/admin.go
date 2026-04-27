@@ -97,6 +97,11 @@ func Admin(db *gorm.DB) {
 	apiV1.POST("/project/create-complaint", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, allRoles...), func(c *gin.Context) {
 		projectandtimeline.CreateComplaint(c, db)
 	})
+
+	apiV1.GET("/projects/:project_id/complaints", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, allRoles...), func(c *gin.Context) {
+		projectandtimeline.GetComplaintsByProject(c, db)
+	})
+
 	// Listen and serve on defined port
 	log.Printf("Application started, Listening on Port %s", port)
 	router.Run(":" + port)
