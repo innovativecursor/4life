@@ -793,3 +793,87 @@ func CreateComplaint(c *gin.Context, db *gorm.DB) {
 		"message": "Complaint created successfully",
 	})
 }
+
+func GetComplaintsByProject(c *gin.Context, db *gorm.DB) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	currentUser, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user object"})
+		return
+	}
+
+	projectID := c.Param("project_id")
+
+	var allowed []models.ComplaintRoleAccess
+	db.Where("project_id = ?", projectID).Find(&allowed)
+
+	hasAccess := false
+
+	for _, r := range allowed {
+		if r.RoleName == currentUser.ApplicationRole {
+			hasAccess = true
+			break
+		}
+	}
+
+	if currentUser.ApplicationRole == "Superadmin" {
+		hasAccess = true
+	}
+
+	if !hasAccess {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "You are not allowed to view complaints for this project",
+		})
+		return
+	}
+
+	var complaints []models.ProjectComplaint
+
+	if err := db.
+		Preload("Images").
+		Order("created_at DESC").
+		Where("project_id = ?", projectID).
+		Find(&complaints).Error; err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to fetch complaints",
+		})
+		return
+	}
+
+	type ComplaintResponse struct {
+		ID        uint     `json:"id"`
+		UserID    uint     `json:"user_id"`
+		Text      string   `json:"text"`
+		Images    []string `json:"images"`
+		CreatedAt string   `json:"created_at"`
+	}
+
+	var response []ComplaintResponse
+
+	for _, cmt := range complaints {
+
+		var imageURLs []string
+		for _, img := range cmt.Images {
+			imageURLs = append(imageURLs, img.ImageURL)
+		}
+
+		response = append(response, ComplaintResponse{
+			ID:        cmt.ID,
+			UserID:    cmt.UserID,
+			Text:      cmt.Text,
+			Images:    imageURLs,
+			CreatedAt: cmt.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"total":      len(response),
+		"complaints": response,
+	})
+}
