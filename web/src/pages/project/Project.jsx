@@ -1,10 +1,28 @@
 import React from "react";
 import CreateProject from "../../components/project/CreateProject";
+import ProjectList from "../../components/project/ProjectList";
 
 const Project = () => {
   return (
-    <div>
-      <CreateProject />
+    <div className="p-6 space-y-5">
+
+      {/* Header Card */}
+      <div className="bg-gradient-to-r from-[#FFF1CC] to-[#FFF8E7] border border-[#F1E5C6] rounded-2xl p-5 flex justify-between items-center shadow-sm">
+        
+        <div>
+          <h2 className="text-xl font-semibold text-[#7C5A00]">
+            Projects
+          </h2>
+          <p className="text-sm text-gray-500">
+            Manage all your projects in one place
+          </p>
+        </div>
+
+        <CreateProject />
+      </div>
+
+      {/* Table */}
+      <ProjectList />
     </div>
   );
 };

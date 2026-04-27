@@ -239,3 +239,15 @@ html {
 .input-style {
   @apply border border-gray-300 rounded-xl px-3 py-3 text-sm outline-none focus:border-secondary w-full;
 }
+
+
+
+.custom-ok-btn {
+  background-color: #d97706 !important;
+  border-color: #d97706 !important;
+}
+
+.custom-ok-btn:hover {
+  background-color: #b45309 !important;
+  border-color: #b45309 !important;
+}

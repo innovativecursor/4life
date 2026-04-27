@@ -21,20 +21,19 @@ const PendingAdmins = () => {
 
     mutate(
       { email: admin.email, role, status: "approved" },
-      { onSuccess: () => toast.success("Approved") }
+      { onSuccess: () => toast.success("Approved") },
     );
   };
 
   const handleReject = (admin) => {
     mutate(
-      { email: admin.email, role: "NA", status: "rejected" },
-      { onSuccess: () => toast.success("Rejected") }
+      { email: admin.email, status: "rejected" },
+      { onSuccess: () => toast.success("Rejected") },
     );
   };
 
   return (
     <div className="bg-white border border-[#F1E5C6] rounded-2xl p-5">
-
       <h2 className="text-lg font-semibold mb-4 text-[#7C5A00]">
         Pending Approvals
       </h2>
