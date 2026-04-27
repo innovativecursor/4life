@@ -35,19 +35,30 @@ const AddTimeline = () => {
       </h2>
 
       <div className="grid md:grid-cols-2 gap-4">
+        
+        {/* Name */}
         <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           className="p-3 rounded-xl border border-[#F1E5C6] bg-white focus:ring-2 focus:ring-[#F59E0B] outline-none"
           placeholder="Timeline Name"
         />
 
+        {/* Steps */}
         <input
+          value={steps}
+          onChange={(e) => setSteps(e.target.value)}
           className="p-3 rounded-xl border border-[#F1E5C6] bg-white focus:ring-2 focus:ring-[#F59E0B] outline-none"
           placeholder="Steps (comma separated)"
         />
       </div>
 
-      <button className="mt-5 w-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] text-white py-3 rounded-xl font-medium shadow-md hover:scale-[1.02] transition">
-        Add Timeline
+      <button
+        onClick={handleSubmit}
+        disabled={isPending}
+        className="mt-5 w-full bg-gradient-to-r from-[#D97706] to-[#F59E0B] text-white py-3 rounded-xl font-medium shadow-md hover:scale-[1.02] transition"
+      >
+        {isPending ? "Adding..." : "Add Timeline"}
       </button>
     </div>
   );

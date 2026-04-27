@@ -29,6 +29,10 @@ const endpoints = {
   allrole: {
     list: `${baseUrl}/v1/superadmin/get-all-roles`, // GET
   },
+
+  approveUser: {
+    list: `${baseUrl}/v1/superadmin/approve-uesrs`, // PUT
+  },
 };
 
 export { baseUrl, apiPrefix };

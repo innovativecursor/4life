@@ -41,6 +41,7 @@ const AllRoutes = () => {
       </Route>
 
       {/* Not Found */}
+      <Route path="/not-found" element={<NotFound />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
