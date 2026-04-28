@@ -251,3 +251,15 @@ html {
   background-color: #b45309 !important;
   border-color: #b45309 !important;
 }
+
+
+.ant-input {
+  border-color: #F3E6C9 !important;
+}
+
+.ant-input:focus,
+.ant-input-focused {
+  outline: none !important;
+  border-color: #D97706 !important;
+  box-shadow: none !important; /* no glow = premium */
+}

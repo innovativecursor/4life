@@ -88,6 +88,12 @@ const Role = () => {
             borderColor: "#D97706",
           },
         }}
+        cancelButtonProps={{
+          style: {
+            color: "#D97706",
+            borderColor: "#F3E6C9",
+          },
+        }}
       >
         <Input
           placeholder="Enter role name"

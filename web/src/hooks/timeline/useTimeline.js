@@ -1,46 +1,3 @@
-// import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-// import {
-//   addTimeline,
-//   getAllTimelines,
-//   updateTimeline,
-// } from "../../services/timeline.service";
-
-// // 📥 GET
-// export const useGetTimelines = () => {
-//   return useQuery({
-//     queryKey: ["timelines"],
-//     queryFn: getAllTimelines,
-//   });
-// };
-
-// // ➕ POST
-// export const useAddTimeline = () => {
-//   const queryClient = useQueryClient();
-
-//   return useMutation({
-//     mutationFn: addTimeline,
-
-//     onSuccess: () => {
-//       queryClient.invalidateQueries(["timelines"]);
-//     },
-//   });
-// };
-
-// export const useUpdateTimeLine = () => {
-//   const queryClient = useQueryClient();
-
-//   return useMutation({
-//     mutationFn: updateTimeline,
-//     onSuccess: () => {
-//       queryClient.invalidateQueries(["timelines"]);
-//     },
-//   });
-// };
-
-
-
-
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   addTimeline,
@@ -48,7 +5,7 @@ import {
   updateTimeline,
 } from "../../services/timeline.service";
 
-// 📥 GET
+// GET
 export const useGetTimelines = () => {
   return useQuery({
     queryKey: ["timelines"],
@@ -56,7 +13,7 @@ export const useGetTimelines = () => {
   });
 };
 
-// ➕ ADD
+//  ADD
 export const useAddTimeline = () => {
   const queryClient = useQueryClient();
 
@@ -68,7 +25,7 @@ export const useAddTimeline = () => {
   });
 };
 
-// ✏️ UPDATE
+//  UPDATE
 export const useUpdateTimeline = () => {
   const queryClient = useQueryClient();
 
