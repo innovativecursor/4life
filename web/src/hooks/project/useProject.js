@@ -1,24 +1,36 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createProject, getAllProjects } from "../../services/project.service";
+import {
+  createProject,
+  getAllProjects,
+  getProjectById,
+} from "../../services/project.service";
 
 export const useAddProject = () => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: createProject,
-        onSuccess: () => {
-            queryClient.invalidateQueries(["projects"]);
-        },
-    });
+  return useMutation({
+    mutationFn: createProject,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["projects"]);
+    },
+  });
 };
 
 export const useGetProjects = (page = 1, limit = 10) => {
-    return useQuery({
-        queryKey: ["projects", page],
-        queryFn: () =>
-            getAllProjects({
-                page,
-                limit,
-            }),
-    });
+  return useQuery({
+    queryKey: ["projects", page],
+    queryFn: () =>
+      getAllProjects({
+        page,
+        limit,
+      }),
+  });
+};
+
+export const useGetProjectById = (id, enabled) => {
+  return useQuery({
+    queryKey: ["project-details", id],
+    queryFn: () => getProjectById(id),
+    enabled: !!id && enabled,
+  });
 };

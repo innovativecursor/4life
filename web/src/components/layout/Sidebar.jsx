@@ -5,6 +5,7 @@ import {
   FolderDot,
   X,
   Shield,
+  Key,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -93,6 +94,14 @@ const Sidebar = ({ isOpen, isMobile, onClose }) => {
               to="/role"
               icon={<Shield size={20} />}
               label="Role"
+              isOpen={isOpen || isMobile}
+              onClose={onClose}
+              isMobile={isMobile}
+            />
+            <Item
+              to="/step-permissions"
+              icon={<Key size={20} />}
+              label="Step Permissions"
               isOpen={isOpen || isMobile}
               onClose={onClose}
               isMobile={isMobile}

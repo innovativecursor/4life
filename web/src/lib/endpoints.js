@@ -17,12 +17,12 @@ const endpoints = {
   timeline: {
     add: `${baseUrl}/v1/project/add-timeline`, // POST
     list: `${baseUrl}/v1/project/get-all-timelines`, // GET
-    update: `${baseUrl}/v1/project/update-timelines`, // update
+    update: `${baseUrl}/v1/project/update-timelines`, // PUT
   },
   project: {
     add: `${baseUrl}/v1/project/create-project`, // POST
     list: `${baseUrl}/v1/projects/get-all-project`, // GET
-
+    projectById: `${baseUrl}/v1/project/get-project-by/:id`, // GET
   },
 
   alladmin: {

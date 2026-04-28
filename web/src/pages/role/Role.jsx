@@ -75,7 +75,7 @@ const Role = () => {
         </table>
       </div>
 
-      {/* 🔥 Modal */}
+      {/*  Modal */}
       <Modal
         title="Create Role"
         open={open}
