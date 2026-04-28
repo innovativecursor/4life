@@ -12,7 +12,10 @@ import {
   Select,
 } from "antd";
 import { useState, useEffect } from "react";
-import { useGetProjectById } from "../../hooks/project/useProject";
+import {
+  useAssignStepRoles,
+  useGetProjectById,
+} from "../../hooks/project/useProject";
 import { useGetRoles } from "../../hooks/role/useRole";
 import toast from "react-hot-toast";
 import StepList from "../../pages/steppermissions/StepList";
@@ -30,7 +33,7 @@ const statusColor = {
 const StepPermissionsModal = ({ open, onClose, projectId }) => {
   const { data, isLoading } = useGetProjectById(projectId, open);
   const { data: roleData } = useGetRoles();
-
+  const { mutate, isPending } = useAssignStepRoles();
   const roles = roleData?.roles || [];
   const project = data?.project;
   const steps = data?.steps || [];
@@ -50,13 +53,22 @@ const StepPermissionsModal = ({ open, onClose, projectId }) => {
   }, [steps]);
 
   const handleSave = (stepId) => {
-    const roleId = selectedRoles[stepId];
-
-    if (!roleId) return toast.error("Select role first");
-
-    console.log("SAVE:", { stepId, roleId });
-
-    toast.success("Permission saved");
+    const roles = selectedRoles[stepId];
+    if (!roles || !roles.length) {
+      return toast.error("Select at least one role");
+    }
+    const payload = {
+      timeline_step_id: stepId,
+      roles,
+    };
+    mutate(payload, {
+      onSuccess: (res) => {
+        toast.success(res?.message || "Roles assigned successfully");
+      },
+      onError: (err) => {
+        toast.error(err?.response?.data?.message || "Something went wrong");
+      },
+    });
   };
 
   return (
@@ -80,9 +92,10 @@ const StepPermissionsModal = ({ open, onClose, projectId }) => {
             renderRight={(step) => (
               <Space>
                 <Select
+                  mode="multiple"
                   placeholder="Select Role"
-                  style={{ width: 160 }}
-                  value={selectedRoles[step.step_id]}
+                  style={{ width: 240 }}
+                  value={selectedRoles[step.step_id] || []}
                   onChange={(val) =>
                     setSelectedRoles((prev) => ({
                       ...prev,
@@ -91,7 +104,7 @@ const StepPermissionsModal = ({ open, onClose, projectId }) => {
                   }
                 >
                   {roles.map((role) => (
-                    <Option key={role.id} value={role.id}>
+                    <Option key={role.id} value={role.name}>
                       {role.name}
                     </Option>
                   ))}
@@ -99,6 +112,7 @@ const StepPermissionsModal = ({ open, onClose, projectId }) => {
 
                 <Button
                   type="primary"
+                  loading={isPending}
                   style={{
                     backgroundColor: "#D97706",
                     borderColor: "#D97706",

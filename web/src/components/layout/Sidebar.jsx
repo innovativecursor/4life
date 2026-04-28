@@ -39,7 +39,7 @@ const Sidebar = ({ isOpen, isMobile, onClose }) => {
             <span
               className={`text-xl font-bold text-[#D97706] transition-opacity duration-300 ${!isOpen && !isMobile ? "opacity-0 w-0" : "opacity-100"}`}
             >
-              Kloud
+              4Life
             </span>
             {!isOpen && !isMobile && (
               <span className="text-xl font-bold text-[#D97706] absolute left-1/2 -translate-x-1/2">

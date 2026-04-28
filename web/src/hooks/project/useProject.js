@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  assignStepRoles,
   createProject,
   getAllProjects,
   getProjectById,
+  updateStepStatus,
 } from "../../services/project.service";
 
 export const useAddProject = () => {
@@ -32,5 +34,17 @@ export const useGetProjectById = (id, enabled) => {
     queryKey: ["project-details", id],
     queryFn: () => getProjectById(id),
     enabled: !!id && enabled,
+  });
+};
+
+export const useUpdateStepStatus = () => {
+  return useMutation({
+    mutationFn: updateStepStatus,
+  });
+};
+
+export const useAssignStepRoles = () => {
+  return useMutation({
+    mutationFn: assignStepRoles,
   });
 };

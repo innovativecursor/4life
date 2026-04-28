@@ -23,6 +23,7 @@ const endpoints = {
     add: `${baseUrl}/v1/project/create-project`, // POST
     list: `${baseUrl}/v1/projects/get-all-project`, // GET
     projectById: `${baseUrl}/v1/project/get-project-by/:id`, // GET
+    stepstatusupdate: `${baseUrl}/v1/project/step-status-update`, // put
   },
 
   alladmin: {
@@ -36,6 +37,10 @@ const endpoints = {
 
   approveUser: {
     list: `${baseUrl}/v1/superadmin/approve-uesrs`, // PUT
+  },
+
+  assignrole: {
+    add: `${baseUrl}/v1/project/assign-step-roles`, // post
   },
 };
 

@@ -63,7 +63,7 @@ const ProjectList = ({ onRowClick, title = "Project List" }) => {
     <div className="bg-white border border-[#F1E5C6] rounded-2xl shadow-sm overflow-hidden">
       {/* Top */}
       <div className="px-6 py-4 border-b border-[#F1E5C6] flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-[#7C5A00]">  {title}</h2>
+        <h2 className="text-lg font-semibold text-[#7C5A00]"> {title}</h2>
 
         <span className="text-sm text-gray-400">
           Total: {pagination.total || 0}
@@ -94,14 +94,15 @@ const ProjectList = ({ onRowClick, title = "Project List" }) => {
         }}
         className="custom-table"
       />
-
-      {!onRowClick && (
-        <ProjectDetailsModal
-          open={!!selectedProject}
-          projectId={selectedProject}
-          onClose={() => setSelectedProject(null)}
-        />
-      )}
+      
+        {!onRowClick && (
+          <ProjectDetailsModal
+            open={!!selectedProject}
+            projectId={selectedProject}
+            onClose={() => setSelectedProject(null)}
+          />
+        )}
+      
     </div>
   );
 };

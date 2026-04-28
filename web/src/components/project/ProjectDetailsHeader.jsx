@@ -3,6 +3,8 @@ import { Tag, Typography } from "antd";
 const { Title, Text } = Typography;
 
 const ProjectDetailsHeader = ({ project }) => {
+  const isDefault = project?.Timeline?.IsDefault;
+
   return (
     <div className="flex justify-between items-start">
       <div>
@@ -12,9 +14,14 @@ const ProjectDetailsHeader = ({ project }) => {
 
         <Text type="secondary">{project?.Description || "No description"}</Text>
 
-        <div className="mt-2 flex gap-2">
+        <div className="mt-2 flex gap-2 items-center">
           <Tag color="gold">{project?.Market}</Tag>
+
           <Tag color="blue">{project?.Timeline?.Name}</Tag>
+
+          <Tag color={isDefault ? "green" : "orange"}>
+            {isDefault ? "Default" : "Custom"}
+          </Tag>
         </div>
       </div>
 
