@@ -14,7 +14,7 @@ const ProjectDetailsHeader = ({ project }) => {
 
         <Text type="secondary">{project?.Description || "No description"}</Text>
 
-        <div className="mt-2 flex gap-2 items-center">
+        <div className="mt-2 flex gap-2 items-center flex-wrap">
           <Tag color="gold">{project?.Market}</Tag>
 
           <Tag color="blue">{project?.Timeline?.Name}</Tag>

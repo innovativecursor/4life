@@ -129,10 +129,11 @@ const ProjectDetailsModal = ({ open, onClose, projectId }) => {
             steps={steps}
             renderRight={(step) => (
               <div className="space-y-2">
-                <Space align="start">
+                <div className="flex flex-col md:flex-row gap-2 w-full">
                   <Select
                     placeholder="Status"
-                    style={{ width: 140 }}
+                    style={{ width: "100%" }}
+                    className="md:!w-[140px]"
                     value={statusMap[step.step_id]}
                     onChange={(val) =>
                       setStatusMap((prev) => ({
@@ -150,7 +151,7 @@ const ProjectDetailsModal = ({ open, onClose, projectId }) => {
                     multiple
                     showUploadList={false}
                     beforeUpload={(file) => handleUpload(file, step.step_id)}
-                    style={{ width: 200 }}
+                    className="w-full md:!w-[200px]"
                   >
                     <p className="text-xs">Drag / Upload</p>
                   </Dragger>
@@ -159,6 +160,7 @@ const ProjectDetailsModal = ({ open, onClose, projectId }) => {
                     type="primary"
                     loading={isPending}
                     onClick={() => handleSave(step)}
+                    className="w-full md:!w-auto"
                     style={{
                       backgroundColor: "#D97706",
                       borderColor: "#D97706",
@@ -166,7 +168,7 @@ const ProjectDetailsModal = ({ open, onClose, projectId }) => {
                   >
                     Save
                   </Button>
-                </Space>
+                </div>
 
                 <div className="flex gap-2 flex-wrap">
                   {(previewMap[step.step_id] || []).map((img, i) => (

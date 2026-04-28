@@ -71,38 +71,39 @@ const ProjectList = ({ onRowClick, title = "Project List" }) => {
       </div>
 
       {/* Table */}
-      <Table
-        columns={columns}
-        dataSource={projects}
-        rowKey="ID"
-        loading={isLoading}
-        onRow={(record) => ({
-          onClick: () => {
-            if (onRowClick) {
-              onRowClick(record);
-            } else {
-              setSelectedProject(record.ID);
-            }
-          },
-        })}
-        pagination={{
-          current: pagination.page,
-          total: pagination.total,
-          pageSize: pagination.limit,
-          onChange: (p) => setPage(p),
-          showSizeChanger: false,
-        }}
-        className="custom-table"
-      />
-      
-        {!onRowClick && (
-          <ProjectDetailsModal
-            open={!!selectedProject}
-            projectId={selectedProject}
-            onClose={() => setSelectedProject(null)}
-          />
-        )}
-      
+      <div className="overflow-x-auto">
+        <Table
+          columns={columns}
+          dataSource={projects}
+          rowKey="ID"
+          loading={isLoading}
+          scroll={{ x: 900 }}
+          onRow={(record) => ({
+            onClick: () => {
+              if (onRowClick) {
+                onRowClick(record);
+              } else {
+                setSelectedProject(record.ID);
+              }
+            },
+          })}
+          pagination={{
+            current: pagination.page,
+            total: pagination.total,
+            pageSize: pagination.limit,
+            onChange: (p) => setPage(p),
+            showSizeChanger: false,
+          }}
+          className="custom-table"
+        />
+      </div>
+      {!onRowClick && (
+        <ProjectDetailsModal
+          open={!!selectedProject}
+          projectId={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      )}
     </div>
   );
 };

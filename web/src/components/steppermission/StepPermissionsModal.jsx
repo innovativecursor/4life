@@ -90,7 +90,7 @@ const StepPermissionsModal = ({ open, onClose, projectId }) => {
           <StepList
             steps={steps}
             renderRight={(step) => (
-              <Space>
+              <div className="flex flex-col md:flex-row gap-2  md:mt-0 mt-4 w-full">
                 <Select
                   mode="multiple"
                   placeholder="Select Role"
@@ -121,7 +121,7 @@ const StepPermissionsModal = ({ open, onClose, projectId }) => {
                 >
                   Save
                 </Button>
-              </Space>
+              </div>
             )}
           />
         </div>

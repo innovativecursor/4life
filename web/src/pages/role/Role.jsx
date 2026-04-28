@@ -33,7 +33,7 @@ const Role = () => {
   if (isLoading) return <p className="p-4">Loading...</p>;
 
   return (
-    <div className="bg-white border border-[#F1E5C6] rounded-2xl shadow-sm overflow-hidden">
+    <div className="bg-white border border-[#F1E5C6] mt-6 rounded-2xl shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 border-b border-[#F1E5C6] flex justify-between items-center">
         <h2 className="text-lg font-semibold text-[#7C5A00]">Roles</h2>

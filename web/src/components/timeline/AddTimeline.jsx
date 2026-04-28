@@ -33,15 +33,13 @@ const AddTimeline = () => {
 
   return (
     <>
-      {/* 🔥 CTA Button */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 bg-[#D97706] hover:bg-[#b45309] text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow-md hover:shadow-lg transition"
+        className="flex items-center justify-center gap-2 bg-[#D97706] hover:bg-[#b45309] text-white px-5 py-2.5 w-full md:w-fit rounded-xl text-sm font-medium shadow-md hover:shadow-lg transition"
       >
         + Create Timeline
       </button>
 
-      {/* 🔥 Modal */}
       <Modal
         title={
           <span className="text-lg font-semibold text-[#7C5A00]">

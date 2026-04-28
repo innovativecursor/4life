@@ -11,7 +11,7 @@ const CreateProject = () => {
   const { data } = useGetTimelines();
   const timelines = data?.timelines || [];
 
-  const countries = getNames(); // 🔥 all countries
+  const countries = getNames();
 
   const { mutate, isPending } = useAddProject();
 
@@ -51,7 +51,7 @@ const CreateProject = () => {
       {/* Button */}
       <button
         onClick={() => setOpen(true)}
-        className="bg-[#D97706] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#b45309]"
+        className="flex items-center justify-center gap-2 bg-[#D97706] hover:bg-[#b45309] text-white px-5 py-2.5 w-full md:w-fit rounded-xl text-sm font-medium shadow-md hover:shadow-lg transition"
       >
         + Create Project
       </button>

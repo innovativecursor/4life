@@ -6,7 +6,7 @@ const StepPermissions = () => {
   const [selectedProject, setSelectedProject] = useState(null);
 
   return (
-    <>
+    <div className="space-y-12 mt-6">
       <ProjectList
         title="Step Permissions"
         onRowClick={(record) => setSelectedProject(record.ID)}
@@ -17,7 +17,7 @@ const StepPermissions = () => {
         projectId={selectedProject}
         onClose={() => setSelectedProject(null)}
       />
-    </>
+    </div>
   );
 };
 

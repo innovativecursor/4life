@@ -25,7 +25,9 @@ const StepList = ({ steps = [], renderRight }) => {
             }}
             bodyStyle={{ padding: 16 }}
           >
-            <Row align="middle" justify="space-between" gutter={16}>
+            <Row 
+            align="middle" justify="space-between" gutter={16}
+            >
               <Col flex="auto">
                 <Space direction="vertical" size={4}>
                   <Text strong style={{ fontSize: 15 }}>
