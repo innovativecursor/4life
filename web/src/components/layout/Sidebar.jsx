@@ -106,6 +106,14 @@ const Sidebar = ({ isOpen, isMobile, onClose }) => {
               onClose={onClose}
               isMobile={isMobile}
             />
+             <Item
+              to="/assign-complaint-roles"
+              icon={<Key size={20} />}
+              label="Assign Complaint Roles"
+              isOpen={isOpen || isMobile}
+              onClose={onClose}
+              isMobile={isMobile}
+            />
           </nav>
 
           <div

@@ -42,6 +42,11 @@ const endpoints = {
   assignrole: {
     add: `${baseUrl}/v1/project/assign-step-roles`, // post
   },
+
+  assigncompalinrole: {
+    add: `${baseUrl}/v1/project/assign-complaint-roles`, // post
+  },
+
 };
 
 export { baseUrl, apiPrefix };

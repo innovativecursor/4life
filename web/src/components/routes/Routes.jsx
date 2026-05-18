@@ -11,6 +11,7 @@ import Project from "../../pages/project/Project";
 import Admin from "../../pages/admin/Admin";
 import Role from "../../pages/role/Role";
 import StepPermissions from "../../pages/steppermissions/StepPermissions";
+import AssignComplaintRoles from "../../pages/assigncomplaintroles/AssignComplaintRoles";
 
 const AllRoutes = () => {
   return (
@@ -40,6 +41,8 @@ const AllRoutes = () => {
         <Route path="/admin" element={<Admin />} />
         <Route path="/role" element={<Role />} />
         <Route path="/step-permissions" element={<StepPermissions />} />
+        <Route path="/assign-complaint-roles" element={<AssignComplaintRoles />} />
+
 
       </Route>
 
