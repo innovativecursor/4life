@@ -5,59 +5,57 @@ import { Modal, Select, Button } from "antd";
 import toast from "react-hot-toast";
 
 import { useGetRoles } from "../../hooks/role/useRole";
-import { useAssignComplaintRoles } from "../../hooks/assigncomplaintrole/useAssignComplaintRoles";
+import {
+  useAssignComplaintRoles,
+  useGetComplaintRoles,
+} from "../../hooks/assigncomplaintrole/useAssignComplaintRoles";
 import { useGetProjectById } from "../../hooks/project/useProject";
-
-// import {
-//   useAssignComplaintRoles,
-//   useGetProjectById,
-// } from "../../hooks/project/useProject";
 
 const { Option } = Select;
 
-const AssignComplaintRolesModal = ({
-  open,
-  onClose,
-  projectId,
-}) => {
-  // PROJECT DETAILS
-  const { data, isLoading } =
-    useGetProjectById(projectId, open);
+const AssignComplaintRolesModal = ({ open, onClose, projectId }) => {
+  // PROJECT
+  const { data: projectData } = useGetProjectById(projectId, open);
 
-  // ROLES
+  // ALL ROLES
   const { data: roleData } = useGetRoles();
 
-  // ASSIGN API
-  const { mutate, isPending } =
-    useAssignComplaintRoles();
+  // GET ASSIGNED ROLES
+  const { data: complaintRoleData } = useGetComplaintRoles(projectId, open);
 
-  // ROLE LIST
-  const roles = roleData?.roles || [];
+  // SAVE API
+  const { mutate, isPending } = useAssignComplaintRoles();
 
   // PROJECT
-  const project = data?.project;
+  const project = projectData?.project;
 
-  // ALREADY ASSIGNED ROLES
-  const assignedRoles =
-    data?.complaint_roles || [];
+  // ROLES
+  const roles = roleData?.roles || [];
 
-  // SELECTED ROLES STATE
-  const [selectedRoles, setSelectedRoles] =
-    useState([]);
+  // ASSIGNED ROLES
+  const assignedRoles = complaintRoleData?.roles || [];
 
-  // PREFILL SELECTED ROLES
-  useEffect(() => {
-    if (open) {
-      setSelectedRoles(assignedRoles);
-    }
-  }, [open, data]);
+  // SELECTED STATE
+  const [selectedRoles, setSelectedRoles] = useState([]);
+
+  // PREFILL
+useEffect(() => {
+  if (
+    open &&
+    Array.isArray(
+      complaintRoleData?.roles
+    )
+  ) {
+    setSelectedRoles(
+      complaintRoleData.roles
+    );
+  }
+}, [open, complaintRoleData]);
 
   // SAVE
   const handleSave = () => {
     if (!selectedRoles.length) {
-      return toast.error(
-        "Select at least one role"
-      );
+      return toast.error("Select at least one role");
     }
 
     const payload = {
@@ -67,17 +65,11 @@ const AssignComplaintRolesModal = ({
 
     mutate(payload, {
       onSuccess: (res) => {
-        toast.success(
-          res?.message ||
-            "Roles assigned successfully"
-        );
+        toast.success(res?.message || "Roles assigned successfully");
       },
 
       onError: (err) => {
-        toast.error(
-          err?.response?.data?.message ||
-            "Something went wrong"
-        );
+        toast.error(err?.response?.data?.message || "Something went wrong");
       },
     });
   };
@@ -90,72 +82,60 @@ const AssignComplaintRolesModal = ({
       width={700}
       title={null}
     >
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <div className="space-y-6">
-          {/* HEADER */}
-          <div>
-            <h2 className="text-xl font-semibold text-[#7C5A00]">
-              {project?.Name}
-            </h2>
+      <div className="space-y-6">
+        {/* HEADER */}
+        <div>
+          <h2 className="text-xl font-semibold text-[#7C5A00]">
+            {project?.Name}
+          </h2>
 
-            <p className="text-sm text-gray-500 mt-1">
-              Assign complaint roles to this
-              project
-            </p>
-          </div>
-
-          {/* SELECT */}
-          <div className="space-y-3">
-            <Select
-              mode="multiple"
-              placeholder="Select Roles"
-              style={{ width: "100%" }}
-              value={selectedRoles}
-              onChange={(val) =>
-                setSelectedRoles(val)
-              }
-            >
-              {roles.map((role) => (
-                <Option
-                  key={role.id}
-                  value={role.name}
-                >
-                  {role.name}
-                </Option>
-              ))}
-            </Select>
-
-            {/* SELECTED ROLE TAGS */}
-            {!!selectedRoles.length && (
-              <div className="flex flex-wrap gap-2">
-                {selectedRoles.map((role) => (
-                  <span
-                    key={role}
-                    className="px-3 py-1 bg-[#FFF1CC] text-[#7C5A00] rounded-full text-sm"
-                  >
-                    {role}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* SAVE BUTTON */}
-            <Button
-              type="primary"
-              loading={isPending}
-              onClick={handleSave}
-              style={{
-                backgroundColor: "#D97706",
-                borderColor: "#D97706",
-              }}
-            >
-              Save Roles
-            </Button>
-          </div>
+          <p className="text-sm text-gray-500">Assign complaint roles</p>
         </div>
-      )}
+
+        {/* SELECT */}
+        <div className="space-y-4">
+          <Select
+            mode="multiple"
+            placeholder="Select Roles"
+            style={{ width: "100%" }}
+            value={selectedRoles}
+            onChange={(val) => setSelectedRoles(val)}
+          >
+            {roles.map((role) => (
+              <Option key={role.id} value={role.name}>
+                {role.name}
+              </Option>
+            ))}
+          </Select>
+
+          {/* SHOW SELECTED */}
+          {!!selectedRoles.length && (
+            <div className="flex flex-wrap gap-2">
+              {selectedRoles.map((role) => (
+                <span
+                  key={role}
+                  className="px-3 py-1 bg-[#FFF1CC] text-[#7C5A00] rounded-full text-sm"
+                >
+                  {role}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* BUTTON */}
+          <Button
+            type="primary"
+            loading={isPending}
+            onClick={handleSave}
+            style={{
+              backgroundColor: "#D97706",
+              borderColor: "#D97706",
+            }}
+          >
+            Save Roles
+          </Button>
+        </div>
+      </div>
     </Modal>
   );
 };

@@ -46,7 +46,15 @@ const endpoints = {
   assigncompalinrole: {
     add: `${baseUrl}/v1/project/assign-complaint-roles`, // post
   },
+  getComplaintRoles: (project_id) =>
+    `${baseUrl}/v1/projects/${project_id}/complaint-roles`, // GET
 
+  complaint: {
+    add: `${baseUrl}/v1/project/create-complaint`,
+  },
+
+  getAllComplaint: (project_id) =>
+    `${baseUrl}/v1/projects/${project_id}/complaints`,
 };
 
 export { baseUrl, apiPrefix };
