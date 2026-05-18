@@ -479,6 +479,13 @@ func UpdateStepStatus(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
+	if len(req.Images) > 5 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Maximum 5 images allowed",
+		})
+		return
+	}
+
 	validStatus := map[string]bool{
 		"pending":     true,
 		"in_progress": true,
@@ -645,6 +652,86 @@ func AssignRolesToStep(c *gin.Context, db *gorm.DB) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Roles assigned successfully"})
+}
+
+func GetStepRolesByProject(c *gin.Context, db *gorm.DB) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	_, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user"})
+		return
+	}
+
+	projectID := c.Param("project_id")
+
+	// 1. Get project
+	var project models.Project
+	if err := db.First(&project, projectID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+		return
+	}
+
+	// 2. Get steps of timeline
+	var steps []models.TimelineStep
+	if err := db.Where("timeline_id = ?", project.TimelineID).
+		Order("step_order ASC").
+		Find(&steps).Error; err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch steps"})
+		return
+	}
+
+	// 3. Get roles
+	var roles []models.TimelineStepRole
+	if err := db.Where("timeline_step_id IN ?", getStepIDs(steps)).
+		Find(&roles).Error; err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch roles"})
+		return
+	}
+
+	// 4. Map roles → stepID
+	roleMap := make(map[uint][]string)
+	for _, r := range roles {
+		roleMap[r.TimelineStepID] = append(roleMap[r.TimelineStepID], r.RoleName)
+	}
+
+	// 5. Response
+	type StepRoleResponse struct {
+		StepID    uint     `json:"step_id"`
+		Name      string   `json:"name"`
+		StepOrder int      `json:"step_order"`
+		Roles     []string `json:"roles"`
+	}
+
+	var response []StepRoleResponse
+
+	for _, step := range steps {
+		response = append(response, StepRoleResponse{
+			StepID:    step.ID,
+			Name:      step.Name,
+			StepOrder: step.StepOrder,
+			Roles:     roleMap[step.ID], // empty if no roles
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"project_id": project.ID,
+		"steps":      response,
+	})
+}
+
+func getStepIDs(steps []models.TimelineStep) []uint {
+	var ids []uint
+	for _, s := range steps {
+		ids = append(ids, s.ID)
+	}
+	return ids
 }
 
 func AssignComplaintRoles(c *gin.Context, db *gorm.DB) {
@@ -875,5 +962,51 @@ func GetComplaintsByProject(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, gin.H{
 		"total":      len(response),
 		"complaints": response,
+	})
+}
+
+func GetComplaintRolesByProject(c *gin.Context, db *gorm.DB) {
+
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
+		return
+	}
+
+	_, ok := user.(*models.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user"})
+		return
+	}
+
+	projectID := c.Param("project_id")
+
+	// check project exists
+	var project models.Project
+	if err := db.First(&project, projectID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+		return
+	}
+
+	// fetch roles
+	var roles []models.ComplaintRoleAccess
+	if err := db.Where("project_id = ?", projectID).
+		Find(&roles).Error; err != nil {
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to fetch complaint roles",
+		})
+		return
+	}
+
+	// extract role names
+	var roleNames []string
+	for _, r := range roles {
+		roleNames = append(roleNames, r.RoleName)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"project_id": project.ID,
+		"roles":      roleNames,
 	})
 }

@@ -90,8 +90,16 @@ func Admin(db *gorm.DB) {
 		projectandtimeline.AssignRolesToStep(c, db)
 	})
 
+	apiV1.GET("/projects/:project_id/step-roles", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, adminAndSuperadmin...), func(c *gin.Context) {
+		projectandtimeline.GetStepRolesByProject(c, db)
+	})
+
 	apiV1.POST("/project/assign-complaint-roles", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, adminAndSuperadmin...), func(c *gin.Context) {
 		projectandtimeline.AssignComplaintRoles(c, db)
+	})
+
+	apiV1.GET("/projects/:project_id/complaint-roles", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, adminAndSuperadmin...), func(c *gin.Context) {
+		projectandtimeline.GetComplaintRolesByProject(c, db)
 	})
 
 	apiV1.POST("/project/create-complaint", middleware.JWTMiddleware(db), middleware.RoleMiddleware(db, allRoles...), func(c *gin.Context) {
