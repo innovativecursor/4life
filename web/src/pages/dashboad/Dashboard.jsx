@@ -1,48 +1,84 @@
+import React from "react";
+import { useGetTimelines } from "../../hooks/timeline/useTimeline";
+
 const Dashboard = () => {
+  const { data, isLoading } = useGetTimelines();
+
+  const defaultTimeline = data?.timelines?.find((item) => item?.is_default);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen text-xl font-medium">
+        Loading...
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6  ">
+    <div className="">
+      <div className="flex items-center mt-10 gap-4 mb-10">
+        <h1 className="text-xl font-semibold text-black">
+          {defaultTimeline?.name}
+        </h1>
 
-      {/* Top Title */}
-      <div className="md:mt-0 mt-6">
-        <h1 className="text-2xl md:text-start text-center font-semibold text-gray-800">Overview</h1>
-        <p className="text-sm md:text-start text-center text-gray-500">Welcome back </p>
+        <div className="bg-white rounded-full px-5 py-2 text-sm font-medium text-secondary shadow-sm">
+          Default
+        </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-white rounded-xl p-8 overflow-x-auto">
+        <div className="flex items-start min-w-max">
+          {defaultTimeline?.steps?.map((step, index) => {
+            const isCompleted = index < 2;
+            const isProgress = index === 2;
 
-        <StatCard title="Users" value="1,245" />
-        <StatCard title="Revenue" value="$12,430" />
-        <StatCard title="Orders" value="320" />
-      </div>
+            return (
+              <div key={step.id} className="flex items-start">
+                <div className="min-w-[260px]">
+                  <div className="flex items-center">
+                    <div
+                      className={`relative w-7 h-7 rounded-full border-2 flex items-center justify-center
+                        ${
+                          isCompleted || isProgress
+                            ? "border-secondary"
+                            : "border-[#D8D8D8]"
+                        }`}
+                    >
+                      <div
+                        className={`w-5 h-5 rounded-full
+                          ${
+                            isCompleted || isProgress
+                              ? "bg-secondary"
+                              : "bg-white"
+                          }`}
+                      />
+                    </div>
 
-      {/* Main Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-        <div className="bg-white p-5 rounded-xl border border-[#F1E5C6]">
-          <h2 className="text-sm font-medium text-gray-700 mb-3">
-            Recent Activity
-          </h2>
-          <p className="text-sm text-gray-500">No recent activity</p>
+                    {index !== defaultTimeline.steps.length - 1 && (
+                      <div
+                        className={`w-[200px] h-[4px] rounded-full mx-3
+                          ${index < 3 ? "bg-secondary" : "bg-[#E5E5E5]"}`}
+                      />
+                    )}
+                  </div>
+
+                  <div className="mt-5">
+                    <p className="uppercase text-sm text-[#B0B0B0]">
+                      Step {step.step_order}
+                    </p>
+
+                    <h2 className="text-sm leading-5 font-medium text-[#222] mt-3 max-w-[220px]">
+                      {step.name}
+                    </h2>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
-
-        <div className="bg-white p-5 rounded-xl border border-[#F1E5C6]">
-          <h2 className="text-sm font-medium text-gray-700 mb-3">
-            Quick Stats
-          </h2>
-          <p className="text-sm text-gray-500">Coming soon...</p>
-        </div>
-
       </div>
     </div>
   );
 };
-
-const StatCard = ({ title, value }) => (
-  <div className="bg-white p-5 md:rounded-xl border border-[#F1E5C6]">
-    <p className="text-sm text-gray-500">{title}</p>
-    <h2 className="text-xl font-semibold text-gray-800 mt-1">{value}</h2>
-  </div>
-);
 
 export default Dashboard;

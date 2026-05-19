@@ -5,6 +5,8 @@ import {
   FolderDot,
   X,
   Shield,
+  Key,
+  ShieldCheck,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -38,7 +40,7 @@ const Sidebar = ({ isOpen, isMobile, onClose }) => {
             <span
               className={`text-xl font-bold text-[#D97706] transition-opacity duration-300 ${!isOpen && !isMobile ? "opacity-0 w-0" : "opacity-100"}`}
             >
-              Kloud
+              4Life
             </span>
             {!isOpen && !isMobile && (
               <span className="text-xl font-bold text-[#D97706] absolute left-1/2 -translate-x-1/2">
@@ -93,6 +95,22 @@ const Sidebar = ({ isOpen, isMobile, onClose }) => {
               to="/role"
               icon={<Shield size={20} />}
               label="Role"
+              isOpen={isOpen || isMobile}
+              onClose={onClose}
+              isMobile={isMobile}
+            />
+            <Item
+              to="/step-permissions"
+              icon={<Key size={20} />}
+              label="Step Permissions"
+              isOpen={isOpen || isMobile}
+              onClose={onClose}
+              isMobile={isMobile}
+            />
+             <Item
+              to="/assign-complaint-roles"
+              icon={<ShieldCheck size={20} />}
+              label="Assign Complaint Roles"
               isOpen={isOpen || isMobile}
               onClose={onClose}
               isMobile={isMobile}

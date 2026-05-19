@@ -1,8 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addTimeline, getAllTimelines } from "../../services/timeline.service";
+import {
+  addTimeline,
+  getAllTimelines,
+  updateTimeline,
+} from "../../services/timeline.service";
 
-
-// 📥 GET
+// GET
 export const useGetTimelines = () => {
   return useQuery({
     queryKey: ["timelines"],
@@ -10,13 +13,24 @@ export const useGetTimelines = () => {
   });
 };
 
-// ➕ POST
+//  ADD
 export const useAddTimeline = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: addTimeline,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["timelines"]);
+    },
+  });
+};
 
+//  UPDATE
+export const useUpdateTimeline = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateTimeline,
     onSuccess: () => {
       queryClient.invalidateQueries(["timelines"]);
     },
