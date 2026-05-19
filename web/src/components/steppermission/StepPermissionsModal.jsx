@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import {
   useAssignStepRoles,
   useGetProjectById,
+  useGetStepRoles,
 } from "../../hooks/project/useProject";
 import { useGetRoles } from "../../hooks/role/useRole";
 import toast from "react-hot-toast";
@@ -32,6 +33,7 @@ const statusColor = {
 
 const StepPermissionsModal = ({ open, onClose, projectId }) => {
   const { data, isLoading } = useGetProjectById(projectId, open);
+  const { data: stepRoleData } = useGetStepRoles(projectId, open);
   const { data: roleData } = useGetRoles();
   const { mutate, isPending } = useAssignStepRoles();
   const roles = roleData?.roles || [];
@@ -41,22 +43,28 @@ const StepPermissionsModal = ({ open, onClose, projectId }) => {
   const [selectedRoles, setSelectedRoles] = useState({});
 
   useEffect(() => {
-    if (steps.length) {
+    if (!open) return;
+
+    const steps = stepRoleData?.steps;
+
+    if (Array.isArray(steps)) {
       const map = {};
-      steps.forEach((s) => {
-        if (s.role_id) {
-          map[s.step_id] = s.role_id;
-        }
+
+      steps.forEach((item) => {
+        map[item.step_id] = item.roles || [];
       });
+
       setSelectedRoles(map);
+    } else {
+      setSelectedRoles({});
     }
-  }, [steps]);
+  }, [open, projectId, stepRoleData]);
 
   const handleSave = (stepId) => {
     const roles = selectedRoles[stepId];
-    if (!roles || !roles.length) {
-      return toast.error("Select at least one role");
-    }
+    // if (!roles || !roles.length) {
+    //   return toast.error("Select at least one role");
+    // }
     const payload = {
       timeline_step_id: stepId,
       roles,
@@ -64,9 +72,10 @@ const StepPermissionsModal = ({ open, onClose, projectId }) => {
     mutate(payload, {
       onSuccess: (res) => {
         toast.success(res?.message || "Roles assigned successfully");
+        onClose();
       },
       onError: (err) => {
-        toast.error(err?.response?.data?.message || "Something went wrong");
+        toast.error(err?.response?.data?.error || "Something went wrong");
       },
     });
   };

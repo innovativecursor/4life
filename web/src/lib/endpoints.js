@@ -26,6 +26,9 @@ const endpoints = {
     stepstatusupdate: `${baseUrl}/v1/project/step-status-update`, // put
   },
 
+  getAllStepRole: (project_id) =>
+    `${baseUrl}/v1/projects/${project_id}/step-roles`,  // GET
+
   alladmin: {
     list: `${baseUrl}/v1/superadmin/get-all-admin`, // GET
   },
@@ -56,6 +59,10 @@ const endpoints = {
   getAllComplaint: (project_id) =>
     `${baseUrl}/v1/projects/${project_id}/complaints`,
 };
+
+
+
+
 
 export { baseUrl, apiPrefix };
 export default endpoints;

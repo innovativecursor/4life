@@ -22,4 +22,21 @@ export const assignStepRoles = async (data) => {
   return await fetchDataPost(endpoints.assignrole.add, data);
 };
 
+// GET STEP ROLES
+export const getAllStepRoles = async (
+  projectId
+) => {
+  return await fetchDataGet(
+    endpoints.getAllStepRole(projectId)
+  );
+};
+
+export const createComplaint = async (data) => {
+  return await fetchDataPost(endpoints.complaint.add, data);
+};
+
+export const getAllComplaints = async (projectId) => {
+  return await fetchDataGet(endpoints.getAllComplaint(projectId));
+};
+
 

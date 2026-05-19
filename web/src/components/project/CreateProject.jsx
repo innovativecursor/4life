@@ -25,8 +25,8 @@ const CreateProject = () => {
   });
 
   const handleSubmit = () => {
-    if (!form.name || !form.market || !form.timeline_id) {
-      return toast.error("Name, Market, and Timeline required");
+    if (!form.name || !form.market) {
+      return toast.error("Name and Market required");
     }
 
     mutate(form, {
@@ -41,7 +41,7 @@ const CreateProject = () => {
         });
       },
       onError: (err) => {
-        toast.error(err?.response?.data?.message || "Failed");
+        toast.error(err?.response?.data?.error || "Failed");
       },
     });
   };

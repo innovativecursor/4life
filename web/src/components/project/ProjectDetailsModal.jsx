@@ -104,7 +104,7 @@ const ProjectDetailsModal = ({ open, onClose, projectId }) => {
         setPreviewMap({});
       },
       onError: (err) => {
-        toast.error(err?.response?.data?.message || "Failed");
+        toast.error(err?.response?.data?.error || "Failed");
       },
     });
   };

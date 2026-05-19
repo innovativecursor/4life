@@ -6,6 +6,7 @@ import {
   X,
   Shield,
   Key,
+  ShieldCheck,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
@@ -108,7 +109,7 @@ const Sidebar = ({ isOpen, isMobile, onClose }) => {
             />
              <Item
               to="/assign-complaint-roles"
-              icon={<Key size={20} />}
+              icon={<ShieldCheck size={20} />}
               label="Assign Complaint Roles"
               isOpen={isOpen || isMobile}
               onClose={onClose}

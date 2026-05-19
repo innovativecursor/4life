@@ -1,8 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   assignStepRoles,
+  createComplaint,
   createProject,
+  getAllComplaints,
   getAllProjects,
+  getAllStepRoles,
   getProjectById,
   updateStepStatus,
 } from "../../services/project.service";
@@ -46,5 +49,41 @@ export const useUpdateStepStatus = () => {
 export const useAssignStepRoles = () => {
   return useMutation({
     mutationFn: assignStepRoles,
+  });
+};
+
+// GET STEP ROLES
+export const useGetStepRoles = (
+  projectId,
+  enabled = true
+) => {
+  return useQuery({
+    queryKey: [
+      "step-roles",
+      projectId,
+    ],
+
+    queryFn: () =>
+      getAllStepRoles(projectId),
+
+    enabled: !!projectId && enabled,
+  });
+};
+
+// CREATE COMPLAINT
+export const useCreateComplaint = () => {
+  return useMutation({
+    mutationFn: createComplaint,
+  });
+};
+
+// GET COMPLAINTS
+export const useGetComplaints = (projectId, enabled = true) => {
+  return useQuery({
+    queryKey: ["complaints", projectId],
+
+    queryFn: () => getAllComplaints(projectId),
+
+    enabled: !!projectId && enabled,
   });
 };

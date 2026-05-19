@@ -59,7 +59,7 @@ const EditTimeline = ({ open, onClose, timeline }) => {
         onClose();
       },
       onError: (err) => {
-        toast.error(err?.response?.data?.message || "Failed");
+        toast.error(err?.response?.data?.error || "Failed");
       },
     });
   };

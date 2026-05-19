@@ -17,7 +17,7 @@ const Project = () => {
       </div>
 
       {/* Table */}
-      <ProjectList />
+      <ProjectList showComplaintActions={true} />
     </div>
   );
 };

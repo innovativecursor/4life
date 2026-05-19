@@ -1,15 +1,25 @@
 import React, { useState } from "react";
 import { useGetProjects } from "../../hooks/project/useProject";
-import { Table, Tag } from "antd";
+import { Table, Tag, Space, Button } from "antd";
 import ProjectDetailsModal from "./ProjectDetailsModal";
+import CreateComplaintModal from "./CreateComplaintModal";
+import ViewComplaintsModal from "./ViewComplaintsModal";
 
-const ProjectList = ({ onRowClick, title = "Project List" }) => {
+const ProjectList = ({
+  onRowClick,
+  title = "Project List",
+  showComplaintActions = false,
+}) => {
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useGetProjects(page, 10);
   const [selectedProject, setSelectedProject] = useState(null);
   const projects = data?.projects || [];
   const pagination = data?.pagination || {};
+
+  const [complaintProject, setComplaintProject] = useState(null);
+
+  const [viewComplaintProject, setViewComplaintProject] = useState(null);
 
   const columns = [
     {
@@ -57,6 +67,45 @@ const ProjectList = ({ onRowClick, title = "Project List" }) => {
         </span>
       ),
     },
+
+    ...(showComplaintActions
+      ? [
+          {
+            title: "Actions",
+
+            render: (_, record) => (
+              <Space>
+                <Button
+                  type="primary"
+                  size="small"
+                  style={{
+                    backgroundColor: "#D97706",
+                    borderColor: "#D97706",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    setComplaintProject(record.ID);
+                  }}
+                >
+                  Create Complaint
+                </Button>
+
+                <Button
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    setViewComplaintProject(record.ID);
+                  }}
+                >
+                  View Complaints
+                </Button>
+              </Space>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -97,6 +146,23 @@ const ProjectList = ({ onRowClick, title = "Project List" }) => {
           className="custom-table"
         />
       </div>
+
+      {showComplaintActions && (
+        <>
+          <CreateComplaintModal
+            open={!!complaintProject}
+            projectId={complaintProject}
+            onClose={() => setComplaintProject(null)}
+          />
+
+          <ViewComplaintsModal
+            open={!!viewComplaintProject}
+            projectId={viewComplaintProject}
+            onClose={() => setViewComplaintProject(null)}
+          />
+        </>
+      )}
+
       {!onRowClick && (
         <ProjectDetailsModal
           open={!!selectedProject}

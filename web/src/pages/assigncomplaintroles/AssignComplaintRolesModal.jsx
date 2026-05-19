@@ -39,24 +39,21 @@ const AssignComplaintRolesModal = ({ open, onClose, projectId }) => {
   const [selectedRoles, setSelectedRoles] = useState([]);
 
   // PREFILL
-useEffect(() => {
-  if (
-    open &&
-    Array.isArray(
-      complaintRoleData?.roles
-    )
-  ) {
-    setSelectedRoles(
-      complaintRoleData.roles
-    );
-  }
-}, [open, complaintRoleData]);
+  useEffect(() => {
+    if (!open) return;
+
+    if (Array.isArray(complaintRoleData?.roles)) {
+      setSelectedRoles(complaintRoleData.roles);
+    } else {
+      setSelectedRoles([]);
+    }
+  }, [projectId, open, complaintRoleData]);
 
   // SAVE
   const handleSave = () => {
-    if (!selectedRoles.length) {
-      return toast.error("Select at least one role");
-    }
+    // if (!selectedRoles.length) {
+    //   return toast.error("Select at least one role");
+    // }
 
     const payload = {
       project_id: projectId,
@@ -66,10 +63,12 @@ useEffect(() => {
     mutate(payload, {
       onSuccess: (res) => {
         toast.success(res?.message || "Roles assigned successfully");
+
+        onClose();
       },
 
       onError: (err) => {
-        toast.error(err?.response?.data?.message || "Something went wrong");
+        toast.error(err?.response?.data?.error || "Something went wrong");
       },
     });
   };
@@ -94,19 +93,21 @@ useEffect(() => {
 
         {/* SELECT */}
         <div className="space-y-4">
-          <Select
-            mode="multiple"
-            placeholder="Select Roles"
-            style={{ width: "100%" }}
-            value={selectedRoles}
-            onChange={(val) => setSelectedRoles(val)}
-          >
-            {roles.map((role) => (
-              <Option key={role.id} value={role.name}>
-                {role.name}
-              </Option>
-            ))}
-          </Select>
+          <div className="mb-5">
+            <Select
+              mode="multiple"
+              placeholder="Select Roles"
+              style={{ width: "100%" }}
+              value={selectedRoles}
+              onChange={(val) => setSelectedRoles(val)}
+            >
+              {roles.map((role) => (
+                <Option key={role.id} value={role.name}>
+                  {role.name}
+                </Option>
+              ))}
+            </Select>
+          </div>
 
           {/* SHOW SELECTED */}
           {!!selectedRoles.length && (

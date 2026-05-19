@@ -1,3 +1,131 @@
+// import { useGoogleLogin } from "@react-oauth/google";
+// import Swal from "sweetalert2";
+// import { useNavigate } from "react-router";
+// import { useState } from "react";
+// import toast from "react-hot-toast";
+
+// import endpoints from "../../lib/endpoints";
+// import { useAuthContext } from "../../contexts/AuthContext";
+// import { fetchDataGet } from "../../lib/fetchdata";
+
+// const Login = () => {
+//   const navigate = useNavigate();
+//   const [loading, setLoading] = useState(false);
+//   const { loginUser } = useAuthContext();
+
+//   const login = useGoogleLogin({
+//     flow: "auth-code",
+//     onSuccess: async (codeResponse) => {
+//       setLoading(true);
+//       try {
+//         const res = await fetchDataGet(endpoints.auth.googleLogin, {
+//           code: codeResponse.code,
+//         });
+
+//         const { token, status, message } = res || {};
+
+//         if (status === "pending") {
+//           setLoading(false);
+//           Swal.fire("Pending", message, "warning");
+//           return;
+//         }
+
+//         if (status === "approved" && token) {
+//           await loginUser(token);
+//           toast.success("Login success");
+//           navigate("/dashboard");
+//           return;
+//         }
+
+//         Swal.fire("Error", message || "Login failed", "error");
+//       } catch (err) {
+//         const message = err?.response?.data?.message || "Login failed";
+
+//         const status = err?.response?.data?.status;
+
+//         if (status === "pending") {
+//           Swal.fire("Pending", message, "warning");
+//           return;
+//         }
+
+//         Swal.fire("Error", message, "error");
+//       } finally {
+//         setLoading(false);
+//       }
+//     },
+//   });
+
+//   return (
+//     <div
+//       className="min-h-screen flex items-center justify-center 
+//       bg-gradient-to-br from-[#FFF8E7] to-[#FFE8A3] px-4 relative overflow-hidden"
+//     >
+//       {/* subtle glow */}
+//       <div className="absolute w-[400px] h-[400px] bg-[#FCD34D] opacity-20 blur-[100px] rounded-full top-[-100px] left-[-100px]" />
+//       <div className="absolute w-[300px] h-[300px] bg-[#D97706] opacity-20 blur-[100px] rounded-full bottom-[-100px] right-[-100px]" />
+
+//       {/* Card */}
+//       <div
+//         className="relative z-10 w-full max-w-md 
+//         bg-white/80 backdrop-blur-xl 
+//         border border-white/40 
+//         rounded-3xl shadow-xl p-8"
+//       >
+//         {/* Logo */}
+//         <div className="flex justify-center mb-6">
+//           <div
+//             className="w-14 h-14 rounded-2xl 
+//             bg-gradient-to-br from-[#D97706] to-[#F59E0B] 
+//             text-white flex items-center justify-center 
+//             font-semibold text-lg shadow-md"
+//           >
+//             Rx
+//           </div>
+//         </div>
+
+//         {/* Heading */}
+//         <div className="mb-6 text-center">
+//           <h1 className="text-xl font-semibold text-gray-800">Admin Login</h1>
+//           <p className="text-sm text-gray-500 mt-1">
+//             Continue with your Google account
+//           </p>
+//         </div>
+
+//         {/* Button */}
+//         <button
+//           onClick={() => login()}
+//           disabled={loading}
+//           className="w-full flex items-center justify-center gap-3 
+//           bg-white border border-gray-200 
+//           hover:shadow-lg hover:-translate-y-[2px]
+//           active:scale-[0.98]
+//           text-gray-700 py-3 rounded-xl transition-all duration-200
+//           disabled:opacity-60"
+//         >
+//           <img
+//             src="https://www.svgrepo.com/show/475656/google-color.svg"
+//             alt="google"
+//             className="w-5 h-5"
+//           />
+//           {loading ? "Signing in..." : "Continue with Google"}
+//         </button>
+
+//         {/* Footer */}
+//         <p className="text-xs text-gray-400 text-center mt-6">
+//           Authorized access only
+//         </p>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Login;
+
+
+
+
+
+
 import { useGoogleLogin } from "@react-oauth/google";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router";
@@ -56,64 +184,47 @@ const Login = () => {
   });
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center 
-      bg-gradient-to-br from-[#FFF8E7] to-[#FFE8A3] px-4 relative overflow-hidden"
-    >
-      {/* subtle glow */}
-      <div className="absolute w-[400px] h-[400px] bg-[#FCD34D] opacity-20 blur-[100px] rounded-full top-[-100px] left-[-100px]" />
-      <div className="absolute w-[300px] h-[300px] bg-[#D97706] opacity-20 blur-[100px] rounded-full bottom-[-100px] right-[-100px]" />
+    <div className="min-h-screen bg-[#f5f5f5] flex">
+      {/* Left Side */}
+      <div className="hidden lg:flex w-1/2 items-center justify-center bg-[#f1f1f1] p-10">
+        <img
+          src="/login.png"
+          alt="login"
+          className="w-full max-w-[650px] object-contain"
+        />
+      </div>
 
-      {/* Card */}
-      <div
-        className="relative z-10 w-full max-w-md 
-        bg-white/80 backdrop-blur-xl 
-        border border-white/40 
-        rounded-3xl shadow-xl p-8"
-      >
-        {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <div
-            className="w-14 h-14 rounded-2xl 
-            bg-gradient-to-br from-[#D97706] to-[#F59E0B] 
-            text-white flex items-center justify-center 
-            font-semibold text-lg shadow-md"
-          >
-            Rx
+      {/* Right Side */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-6">
+        <div className="w-full max-w-md">
+          <div className="mb-8">
+            <h1 className="text-[52px] leading-[58px] font-semibold text-[#1f1f1f]">
+              Welcome back!
+            </h1>
+
+            <p className="text-[#8c8c8c] text-sm mt-4 leading-6 max-w-[420px]">
+              Login to your account to access your dashboard and continue your
+              workflow.
+            </p>
           </div>
+
+          <button
+            onClick={() => login()}
+            disabled={loading}
+            className="w-full h-[52px] rounded-full border border-[#cfcfcf] 
+            cursor-pointer hover:bg-[#fafafa] transition-all duration-200
+            flex items-center justify-center gap-3 text-[#444]
+            text-sm font-medium disabled:opacity-60"
+          >
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              alt="google"
+              className="w-5 h-5"
+            />
+
+            {loading ? "Signing in..." : "Continue with Google"}
+          </button>
         </div>
-
-        {/* Heading */}
-        <div className="mb-6 text-center">
-          <h1 className="text-xl font-semibold text-gray-800">Admin Login</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Continue with your Google account
-          </p>
-        </div>
-
-        {/* Button */}
-        <button
-          onClick={() => login()}
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-3 
-          bg-white border border-gray-200 
-          hover:shadow-lg hover:-translate-y-[2px]
-          active:scale-[0.98]
-          text-gray-700 py-3 rounded-xl transition-all duration-200
-          disabled:opacity-60"
-        >
-          <img
-            src="https://www.svgrepo.com/show/475656/google-color.svg"
-            alt="google"
-            className="w-5 h-5"
-          />
-          {loading ? "Signing in..." : "Continue with Google"}
-        </button>
-
-        {/* Footer */}
-        <p className="text-xs text-gray-400 text-center mt-6">
-          Authorized access only
-        </p>
       </div>
     </div>
   );
